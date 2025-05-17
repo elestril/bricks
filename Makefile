@@ -1,5 +1,3 @@
-%.brick.stl: %.json
-	openscad -o $@ $<
-
-%.json: %.stl bin/stlinfo.py
-	./bin/stlinfo.py "$<" "$@"
+.PHONY: clean
+clean: 
+	$(MAKE) -C Bricks clean

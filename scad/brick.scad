@@ -10,6 +10,20 @@ module brick_studs(units) {
     for (sy = [0:units.y - 1]) translate([ sx, sy, units.z ] * U) stud();
 }
 
+module brick_sockets(units) {
+  for (sx = [0:units.x - 1])
+    for (sy = [0:units.y - 1]) translate([ sx, sy, 0 ] * U) socket();
+}
+
+module maybe_apply_sockets(units, sockets = true) {
+  if (sockets) difference() {
+      children();
+      brick_sockets(units);
+    }
+  else
+    children();
+}
+
 module wall_bbox(units) {
   intersection() {
     union() {
@@ -41,7 +55,7 @@ module wall_mirror(size) {
   }
 }
 
-module wall_reshape(units, mirror = 7) {
+module wall_reshape(units, mirror = 0) {
   union() {
     if (mirror) {
       wall_mirror([ units.x * U, units.y * U, mirror ]) wall_bbox(units)
@@ -53,8 +67,8 @@ module wall_reshape(units, mirror = 7) {
   }
 }
 
-module brick(units, studs = true) {
-  union() {
+module brick(units, studs = true, sockets = true) {
+  maybe_apply_sockets(units, sockets) union() {
     _tr() cube(units * U);
     if (studs) {
       brick_studs(units);
