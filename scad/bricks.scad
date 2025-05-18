@@ -6,6 +6,8 @@ use <brick.scad>;
 // Kind of brick to generate
 type = "Brick";
 kind = "None";
+studs = true;
+sockets = true;
 
 // Nominal size of the brick in units
 size = [ 2, 1, 4 ];
@@ -16,7 +18,7 @@ name = "";
 echo("Name:", name, " Kind: ", kind, " Size: ", size);
 
 if (type == "Brick") {
-  brick(size);
+  brick(size, studs = studs, sockets = sockets);
 }
 
 if (kind == "None") {

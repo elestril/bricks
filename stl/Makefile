@@ -7,7 +7,7 @@ CONFIGS = $(SUBDIRS:/.=/configs.json)
 
 all: configs stl
 
-stl: $(SUBDIRS)
+stl: configs $(SUBDIRS)
 
 configs: $(CONFIGS)
 $(CONFIGS): configs.jsonnet
