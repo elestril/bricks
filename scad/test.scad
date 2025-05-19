@@ -3,8 +3,12 @@ use <brick.scad>;
 use <hex.scad>;
 use <stud.scad>;
 
-size = [ 4, 1, 4 ];
-// brick(size);
-// hex_r(2, sockets = false);
-color("orange") hex_s(2, z = 0.25, sockets = true);
-// hex_grid(4);
+floor_tx = "../textures/stylized_wood_planks.png";
+studs = false;
+
+size = [ 4, 4, 0.25 ];
+brick(size, studs = false, floor_tx = floor_tx);
+
+// translate([ -0.5 * U, -0.5 * U, 0 ])
+// surface(file = floor_tx);
+// surface(file = "test_tx.dat", convexity = 10);
