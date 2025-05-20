@@ -3,7 +3,7 @@ use <brick.scad>;
 use <hex.scad>;
 use <stud.scad>;
 
-floor_tx = "../textures/wood_planks.png";
+floor_tx = "../textures/wood_planks7.png";
 studs = false;
 
 size = [ 4, 4, 0.25 ];
