@@ -1,0 +1,15 @@
+{
+  "wood_planks": {
+    "name": "wood_planks",
+    "origin": "https://3dtextures.me/2020/07/22/stylized-wood-planks-001/",
+    "input": "hires/Stylized_Wood_Planks_001_height.png",
+    "size": "255x255",
+    "gamma": 20
+  },
+  "wood_planks2": {
+    "origin": "https://3dtextures.me/2024/07/19/stylized-wood-planks-002/",
+    "input": "hires/Stylized_Wood_Planks_002_height.png",
+    "size": "512x512",
+    "gamma": 1
+  }
+}
