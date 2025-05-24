@@ -14,7 +14,7 @@ $(STL_FILES): configs.json
 
 .PHONY: clean distclean
 clean: 
-	rm -f $(wildcard **/*.stl)
+	rm -f $(wildcard *.stl)
 
 distclean: clean
-	rm -f $(wildcard **/*.json)
+	rm -f $(wildcard *.json)

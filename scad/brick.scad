@@ -26,96 +26,74 @@ module maybe_apply_sockets(size, sockets = true) {
     children();
 }
 
-module wall_box(size) {
-  intersection() {
-    // Walls are trimmed to fit below z=0.5U, and have a very wide box in the Y-axis above that.
+module brick_cut(size, kind = "Generic") { 
+  intersection() { 
+  if (kind == "Wall") {
     union() {
-      brick_tr() cube([ size.x, size.y, 0.5 ] * U);
-      translate([ -0.5, -6, 0.5 ] * U) cube([ size.x, 12, size.z - 0.5 ] * U);
+    // Allow singnificant overhangs in the Y direction for walls.
+      translate([-0.5, 0, 0])  cube([ size.x, size.y, 0.5 ] * U);
+      translate([ -0.5, 0, 0.5 ] * U) cube([ size.x, 12, size.z - 0.5 ] * U);
     }
-    children();
+  } else if (kind == "Tile") { 
+    // Allow slightly higher profile on tiles
+    translate(TR) cube(size * U + [0,0,2]);
+  } else { 
+    // Cut to nominal size
+     translate(TR) cube(size * U);
+  }
+  children();
   }
 }
+
 
 module brick_cube(size) { 
   cube(size * U);
 }
 
-module wall_fill(size) {
-  union() {
-    translate([ -0.5, -0.25, 0 ] * U) cube([ size.x, size.y - 0.5, 0.5 ] * U);
-    // translate([ -0.5, -0.25, 0 ] * U) cube([ 0.5, 0.5, size.z ] * U);
-    // translate([ size.x - 1, -0.25, 0 ] * U) cube([ 0.5, 0.5, size.z ] * U);
-  }
-}
-
-module wall_mirror(size) {
-  union() {
-    mirror([ 0, 1, 0 ]) intersection() {
-      translate([ -0.5, 0, 0 ] * U) cube(size);
-      children();
+module socket_mirror(size) {
+  // Mirrors the front side of the tile to the back to cover the openlock slots.
+  if (size.z == 0) { 
+    children();
+  } else { 
+    union() {
+      mirror([ 0, 1, 0 ]) intersection() {
+        translate([ -0.5, 0, 0 ] * U) cube(size);
+        children();
+      }
+      difference() {
+        children();
+        translate([ -0.5, 0, 0 ] * U - [ 0, size.y, 0 ]) cube(size);
+      }
     }
-    difference() {
-      children();
-      translate([ -0.5, 0, 0 ] * U - [ 0, size.y, 0 ]) cube(size);
-    }
-  }
-}
-
-
-module brick_reshape(size) {
-  union() {
-    intersection() {
-      translate(TR) brick_cube(size);
-      children();
-    }
-    // Add solid base
-    translate(TR) cube([ size.x * U, size.y * U, 2]);
-  }
-}
-
-module wall_reshape(size, mirrorZ = 0) {
-  union() {
-    if (mirrorZ) {
-      wall_mirror([ size.x * U, size.y * U, mirrorZ ]) wall_box(size)
-          children();
-    } else {
-      wall_box(size) children();
-    }
-    wall_fill(size);
   }
 }
 
 module brick(size, kind, studs = true, sockets = true, inputStl = "", inputStlOffset = [0,0,0], mirrorZ = 0, floorTx = "") {
-  intersection() {
-    maybe_apply_sockets(size, sockets) union() { 
-      // ***  This is a remix  ***
-      if (inputStl != "") { 
-        if (kind == "Wall") { 
-          wall_reshape(size, mirrorZ) translate(TR + inputStlOffset) import(inputStl, convexity = 50);
-        } else if (size.z < 0.5 ) { 
-          translate(TR + inputStlOffset) import(inputStl, convexity = 50);
-          translate(TR) cube([size.x * U, size.y * U, 2]);
-        } else {
-          translate(TR + inputStlOffset) import(inputStl, convexity = 50);
-          translate(TR) cube([size.x, size.y, 5]);
+  union() {
+    maybe_apply_sockets(size, sockets) brick_cut(size, kind)  
+      union() { 
+        // ***  This is a remix  ***
+        if (inputStl != "") { 
+          if (kind == "Wall") { 
+            socket_mirror([size.x * U, size.y * U, mirrorZ]) translate(TR + inputStlOffset) import(inputStl, convexity = 50);
+            translate([ -0.5, 0, 0 ] * U + [0,]) cube([ size.x, size.y - 0.5, 0.5 ] * U);
+          } else if (size.z < 0.5 ) { 
+            translate(TR + inputStlOffset) import(inputStl, convexity = 50);
+            translate(TR) cube([size.x * U, size.y * U, 2.6]);
+          } else {
+            translate(TR + inputStlOffset) import(inputStl, convexity = 50);
+            translate(TR) cube([size.x * U , size.y * U , 5]);
+          }
         }
-      }
-
-      // *** This is a textured floor tile ***
-      else if (floorTx) {
-        brick_tr() cube(size * U - [ 0, 0, 0.9 ]);
-        translate([ -0.5 * U, -0.5 * U, size.z * U - 0.9 ]) texture(floorTx);
-
-      // ***  This is a blank
-      } else {
-        brick_tr() brick_cube(size);
-      }
-
-      if (studs) {
-        brick_studs(size);
-      }
-    }
-    translate(TR) brick_cube(size);
+        // *** This is a textured floor tile ***
+        else if (floorTx) {
+          brick_tr() cube(size * U - [ 0, 0, 0.9 ]);
+          translate([ -0.5 * U, -0.5 * U, size.z * U - 0.9 ]) texture(floorTx);
+        // ***  This is a blank
+        } else {
+          brick_tr() brick_cube(size);
+        }
+      } 
+    if (studs) brick_studs(size);
   }
 }

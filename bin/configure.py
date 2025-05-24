@@ -33,7 +33,7 @@ STL_NAME_TMPL = "{kind}-{set}-{size[0]}x{size[1]}"
 
 OPENLOCK_CONFIG_TMPL = { 
   'Wall': { 
-    '*':  {'kind': 'Wall', 'studs': True, 'sockets': True, 'mirrorZ': 7.0},
+    '*':  {'kind': 'Wall', 'studs': True, 'sockets': True, 'mirrorZ': 7.2},
     'A':  {'size': [4, 1, 4]},
     'AS': {'size': [4, 1, 4]},
     'L': {'size': [1, 1, 4]},
@@ -96,7 +96,7 @@ def stl2Config(filename: str) -> Optional[Dict]:
   inputStlOffset = msh.min_
 
   if (conf['kind'] == 'Tile'):
-    inputStlOffset[2] = -msh.max_[2] + 0.25*U
+    inputStlOffset[2] = -msh.max_[2] + 4.0
   conf['inputStlOffset'] = [round(v,2) for v in inputStlOffset.tolist()]
 
   if 'size' not in conf:
