@@ -22,7 +22,7 @@ inputStl = "";
 inputStlOffset = [0,0,0]; // [-200, 0.1, 200]
 
 // Mirror z millimeters of the foot to patch any slots
-mirrorZ = 7.0;
+mirrorZ = 7.0; // [0:0.1:100]
 
 // Texture for tiles
 floorTx = "";

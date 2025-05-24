@@ -31,8 +31,8 @@ module brick_cut(size, kind = "Generic") {
   if (kind == "Wall") {
     union() {
     // Allow singnificant overhangs in the Y direction for walls.
-      translate([-0.5, 0, 0])  cube([ size.x, size.y, 0.5 ] * U);
-      translate([ -0.5, 0, 0.5 ] * U) cube([ size.x, 12, size.z - 0.5 ] * U);
+      translate(TR)  cube([ size.x, size.y, 0.5 ] * U);
+      translate([ -0.5, -6, 0.5 ] * U) cube([ size.x, 12, size.z - 0.5 ] * U);
     }
   } else if (kind == "Tile") { 
     // Allow slightly higher profile on tiles
@@ -76,7 +76,7 @@ module brick(size, kind, studs = true, sockets = true, inputStl = "", inputStlOf
         if (inputStl != "") { 
           if (kind == "Wall") { 
             socket_mirror([size.x * U, size.y * U, mirrorZ]) translate(TR + inputStlOffset) import(inputStl, convexity = 50);
-            translate([ -0.5, 0, 0 ] * U + [0,]) cube([ size.x, size.y - 0.5, 0.5 ] * U);
+            translate([ -0.5 * U, -4.2, 0 ]) cube([ size.x, size.y -1 , 0.5 ] * U + [0, 8.4, 0]);
           } else if (size.z < 0.5 ) { 
             translate(TR + inputStlOffset) import(inputStl, convexity = 50);
             translate(TR) cube([size.x * U, size.y * U, 2.6]);
