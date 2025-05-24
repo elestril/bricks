@@ -53,14 +53,14 @@ module hex_base(z = 0.25, stud = true, socket = true) {
 
 module hex_r(size, type, kind, studs, sockets, grid = true) {
   intersection() {
-    hex_sockets(size.x, sockets, 
+    hex_sockets(size.x * 2 + 1, sockets, 
     edge_blank = (size.x > 1), 
     fit = (size.z > 0.25 ? "snug" : "loose")
     )
     union() {
       hex_grid(size, grid) hex_pattern(0, size.x, U)
           hex_base(size.z, stud = false, socket = false);
-      hex_pattern(0, 2 * size.x + 1, unit = 0.5 * U) translate([ 0, 0, size.z ] * U)
+      hex_pattern(0, size.x * 2 + 1, unit = 0.5 * U) translate([ 0, 0, size.z ] * U)
           stud();
     }
     hex_pattern(0, size.x, U) hex_base(size.z + 0.5);

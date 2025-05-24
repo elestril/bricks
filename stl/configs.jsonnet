@@ -18,6 +18,8 @@ local hex = function(class, kind, x,z) brick(kind, x, 0, z) + {
   [ brick('Plate',x,y,0.25).name]: brick('Plate',x,y,0.25) for x in [1,2,3,4,5,6,7,8] for y in [1,2,3,4,5,6,7,8] if x >= y 
   } + { 
     [brick('Wall',x,1,4).name]: brick('Wall', x, 1, 4) for x in [1,2,3,4,5,6,7,8] 
+  } + { 
+    [brick('LowWall',x,1,2).name]: brick('LowWall', x, 1, 2) for x in [1,2,3,4,5,6,7,8] 
   } + {
     [brick('Tile',x,y, 0.25).name]: brick('Tile', x, y, 0.25) + {studs: false} for x in [1,2,4] for y in [1,2,4] if x >= y 
   } + { 
