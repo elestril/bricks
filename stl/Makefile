@@ -1,19 +1,16 @@
 include Makefile.mk
-
 TOPTARGETS := all stl clean distclean
-
-SUBDIRS = $(wildcard */.)
-CONFIGS = $(SUBDIRS:/.=/configs.json)
 
 all: configs stl
 
-stl: configs $(SUBDIRS)
+configs: configs.json
 
-configs: $(CONFIGS)
-$(CONFIGS): configs.jsonnet
-	jsonnet -o $@ $<
+STL_FILES := $(shell jq -r '.["parameterSets"].[].stl' < configs.json)
 
-$(SUBDIRS): 
-	$(MAKE) -C $@ $(MAKECMDGOALS)
+stl: configs.json $(STL_FILES)
+
+$(STL_FILES): configs.json
+	@mkdir -p $(dir $@)
+	openscad --backend Manifold -p configs.json -P $(basename $(notdir $@)) -o $@ $(SCAD_DIR)/bricks.scad
 
 .PHONY: $(TOPTARGETS) $(SUBDIRS)

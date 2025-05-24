@@ -12,15 +12,15 @@ module brick_studs(size) {
     for (sy = [0:size.y - 1]) translate([ sx, sy, size.z ] * U) stud();
 }
 
-module brick_sockets(size) {
+module brick_sockets(size, fit) {
   for (sx = [0:size.x - 1])
-    for (sy = [0:size.y - 1]) translate([ sx, sy, 0 ] * U) socket();
+    for (sy = [0:size.y - 1]) translate([ sx, sy, 0 ] * U) socket(fit);
 }
 
-module maybe_apply_sockets(size, sockets = true) {
+module maybe_apply_sockets(size, sockets = true, fit) {
   if (sockets) difference() {
       children();
-      brick_sockets(size);
+      brick_sockets(size, fit);
     }
   else
     children();
@@ -70,7 +70,7 @@ module socket_mirror(size) {
 
 module brick(size, type, kind, studs = true, sockets = true, inputStl = "", inputStlOffset = [0,0,0], mirrorZ = 0, floorTx = "") {
   union() {
-    maybe_apply_sockets(size, sockets) brick_cut(size, type)  
+    maybe_apply_sockets(size, sockets, fit = size.z > 0.25 ? "snug" :"loose") brick_cut(size, type)  
       union() { 
         // ***  This is a remix  ***
         if (inputStl != "") { 

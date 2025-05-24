@@ -32,9 +32,9 @@ module stud_poly() {
   ]);
 }
 
-module socket() {
+module socket(fit="snug") {
   union() {
-    rotate_extrude(convexity = 4) socket_poly();
+    rotate_extrude(convexity = 4) socket_poly(fit);
     for (a = [ 0, 90 ])
       rotate([ 0, 0, a ]) cube([ 9.2, 0.4, 3.6 ], center = true);
   }
@@ -45,16 +45,16 @@ module socket_blank() {
   translate([ 0, 0, 0.6 ]) linear_extrude(1.2) { circle(r = 2.4); }
 }
 
-module socket_poly() {
+module socket_poly(fit="snug") {
   polygon([
     [ 0.0, -0.4 ],  //
     [ 3.9, -0.4 ],  //
     [ 3.9, 1.0 ],   //
     [ 3.5, 1.0 ],   //
     [ 3.5, 0.0 ],   //
-    [ 2.8, 0.0 ],   //
-    [ 2.5, 0.3 ],   // A
-    [ 2.5, 1.0 ],   // B
+    [ 3.0, 0.0 ],   //
+    fit == "snug" ? [ 2.5, 0.4 ] : [2.6, 0.4],   // A
+    fit == "snug" ? [ 2.5, 1.2 ] : [2.6, 1.2],   // B
     [ 3.1, 1.6 ],   //
     [ 3.9, 1.6 ],   //
     [ 3.9, 2.2 ], 

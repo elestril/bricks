@@ -1,7 +1,11 @@
 include <params.scad>;
 use <stud.scad>;
 
-cube_coords = [ [ 1.5, 0 ], [ sqrt(3) / 2, sqrt(3) ], [ 0, 0 ] ];
+cube_coords = [ 
+  [ 1.5, 0 ], 
+  [ sqrt(3) / 2, sqrt(3) ], 
+  [ 0, 0 ] 
+];
 
 module hex_pattern(mind, maxd = -1, unit = U) {
   maxd = maxd >= 0 ? maxd : mind;
@@ -15,12 +19,12 @@ module hex_pattern(mind, maxd = -1, unit = U) {
   }
 }
 
-module hex_sockets(d = 1, sockets = true, edge_blank = false) {
+module hex_sockets(d = 1, sockets = true, edge_blank = false, fit = "snug") {
   if (sockets) {
     difference() {
       children();
-      hex_pattern(0, edge_blank ? 2 * d : 2 * d + 1, unit = 0.5 * U) socket();
-      if (edge_blank) hex_pattern(2 * d + 1, unit = 0.5 * U) socket_blank();
+      hex_pattern(0, edge_blank ? d -1 : d, unit = 0.5 * U) socket(fit);
+      if (edge_blank) hex_pattern(d, unit = 0.5 * U) socket_blank();
     }
   } else {
     children();
@@ -28,11 +32,11 @@ module hex_sockets(d = 1, sockets = true, edge_blank = false) {
 }
 
 // Grid debossed in the surface
-module hex_grid(d = 1, z = 0.25, grid = true) {
+module hex_grid(size, grid = true) {
   if (grid) {
     difference() {
       children();
-      translate([ 0, 0, z * U - 0.4 ]) hex_pattern(0, d, U) difference() {
+      translate([ 0, 0, size.z * U - 0.4 ]) hex_pattern(0, size.x, U) difference() {
         linear_extrude(height = 0.5) circle(r = U + 0.1, $fn = 6);
         linear_extrude(height = 1.2, center = true, scale = (U - 0.8) / U)
             circle(r = U - 0.1, $fn = 6);
@@ -49,8 +53,12 @@ module hex_base(z = 0.25, stud = true, socket = true) {
 
 module hex_r(size, type, kind, studs, sockets, grid = true) {
   intersection() {
-    hex_sockets(size.x, sockets, true) union() {
-      hex_grid(size.x, size.z, grid) hex_pattern(0, size.x, U)
+    hex_sockets(size.x, sockets, 
+    edge_blank = (size.x > 1), 
+    fit = (size.z > 0.25 ? "snug" : "loose")
+    )
+    union() {
+      hex_grid(size, grid) hex_pattern(0, size.x, U)
           hex_base(size.z, stud = false, socket = false);
       hex_pattern(0, 2 * size.x + 1, unit = 0.5 * U) translate([ 0, 0, size.z ] * U)
           stud();
@@ -61,12 +69,12 @@ module hex_r(size, type, kind, studs, sockets, grid = true) {
 
 module hex_s(size, type, kind, studs, sockets, grid = true) {
   intersection() {
-    hex_sockets(size.x, sockets, true) union() {
-      hex_grid(size.x, size.z, grid) linear_extrude(height = size.z * U)
-          circle(r = 2 * size.x * U, $fn = 6);
-      hex_pattern(0, 2 * size.x + 1, unit = 0.5 * U) translate([ 0, 0, size.z ] * U)
+    hex_sockets(size.x * 2 + 1, sockets, edge_blank = false, fit = size.z > 0.25 ? "snug" : "loose") union() {
+      hex_grid(size, grid) rotate([0,0,30]) linear_extrude(height = size.z * U) circle(r = sqrt(3) * size.x  * U, $fn = 6);
+
+      hex_pattern(0, 2 * size.x, unit = 0.5 * U) translate([ 0, 0, size.z ] * U)
           stud();
     }
-    linear_extrude(height = (size.z + 0.5) * U) circle(r = 2 * size.x * U, $fn = 6);
+    rotate([0,0,30]) linear_extrude(height = (size.z + 0.5) * U) circle(r = sqrt(3) * size.x * U, $fn = 6);
   }
 }
