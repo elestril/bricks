@@ -32,7 +32,6 @@ module hex_grid(d = 1, z = 0.25, grid = true) {
   if (grid) {
     difference() {
       children();
-      echo("z:", z);
       translate([ 0, 0, z * U - 0.4 ]) hex_pattern(0, d, U) difference() {
         linear_extrude(height = 0.5) circle(r = U + 0.1, $fn = 6);
         linear_extrude(height = 1.2, center = true, scale = (U - 0.8) / U)
@@ -44,31 +43,30 @@ module hex_grid(d = 1, z = 0.25, grid = true) {
   }
 }
 
-module hex(z = 0.25, stud = true, socket = true) {
+module hex_base(z = 0.25, stud = true, socket = true) {
   linear_extrude(height = z * U) circle(r = U, $fn = 6);
 }
 
-module hex_r(d = 0, z = 0.25, studs = true, sockets = true, grid = true) {
+module hex_r(size, type, kind, studs, sockets, grid = true) {
   intersection() {
-    hex_sockets(d, sockets, true) union() {
-      hex_grid(d, z, grid) hex_pattern(0, d, U)
-          hex(z, stud = false, socket = false);
-      hex_pattern(0, 2 * d + 1, unit = 0.5 * U) translate([ 0, 0, z ] * U)
+    hex_sockets(size.x, sockets, true) union() {
+      hex_grid(size.x, size.z, grid) hex_pattern(0, size.x, U)
+          hex_base(size.z, stud = false, socket = false);
+      hex_pattern(0, 2 * size.x + 1, unit = 0.5 * U) translate([ 0, 0, size.z ] * U)
           stud();
     }
-    hex_pattern(0, d, U) hex(z + 0.5);
+    hex_pattern(0, size.x, U) hex_base(size.z + 0.5);
   }
 }
 
-module hex_s(d = 0, z = 0.25, studs = true, sockets = true, grid = true) {
+module hex_s(size, type, kind, studs, sockets, grid = true) {
   intersection() {
-    hex_sockets(d, sockets, true) union() {
-      hex_grid(d, z, grid) linear_extrude(height = z * U)
-          circle(r = 2 * d * U, $fn = 6);
-      hex_pattern(0, 2 * d + 1, unit = 0.5 * U) translate([ 0, 0, z ] * U)
+    hex_sockets(size.x, sockets, true) union() {
+      hex_grid(size.x, size.z, grid) linear_extrude(height = size.z * U)
+          circle(r = 2 * size.x * U, $fn = 6);
+      hex_pattern(0, 2 * size.x + 1, unit = 0.5 * U) translate([ 0, 0, size.z ] * U)
           stud();
     }
-
-    linear_extrude(height = (z + 0.5) * U) circle(r = 2 * d * U, $fn = 6);
+    linear_extrude(height = (size.z + 0.5) * U) circle(r = 2 * size.x * U, $fn = 6);
   }
 }

@@ -1,13 +1,16 @@
 include <params.scad>;
 use <brick.scad>;
+use <hex.scad>;
 
 // Parameters
 
 // Kind of brick to generate
-type = "Brick";
+class = "Brick";
+type = "Wall";
 kind = "None";
 studs = true;
 sockets = true;
+grid = true;
 
 // Nominal size of the brick in units
 size = [ 2, 1, 4 ]; // 0.25
@@ -29,11 +32,10 @@ floorTx = "";
 
 module __Customizer_Limit__ () {}  // Hide following assignments from Customizer.
 
-if (type == "Brick") {
-  brick(size, kind, studs, sockets, inputStl, inputStlOffset, mirrorZ, floorTx);
-
-}
-
-if (kind == "None") {
-  echo("No configuration");
+if (class == "Brick") { 
+  brick(size, type, kind, studs, sockets, inputStl, inputStlOffset, mirrorZ, floorTx);
+} else if (class == "Hex-R") { 
+  hex_r(size, type, kind, studs, sockets);
+} else if (class == "Hex-S") { 
+  hex_s(size, type, kind, studs, sockets);
 }

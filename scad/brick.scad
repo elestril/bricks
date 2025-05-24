@@ -26,15 +26,15 @@ module maybe_apply_sockets(size, sockets = true) {
     children();
 }
 
-module brick_cut(size, kind = "Generic") { 
+module brick_cut(size, type = "Generic") { 
   intersection() { 
-  if (kind == "Wall") {
+  if (type == "Wall") {
     union() {
     // Allow singnificant overhangs in the Y direction for walls.
       translate(TR)  cube([ size.x, size.y, 0.5 ] * U);
       translate([ -0.5, -6, 0.5 ] * U) cube([ size.x, 12, size.z - 0.5 ] * U);
     }
-  } else if (kind == "Tile") { 
+  } else if (type == "Tile") { 
     // Allow slightly higher profile on tiles
     translate(TR) cube(size * U + [0,0,2]);
   } else { 
@@ -68,13 +68,13 @@ module socket_mirror(size) {
   }
 }
 
-module brick(size, kind, studs = true, sockets = true, inputStl = "", inputStlOffset = [0,0,0], mirrorZ = 0, floorTx = "") {
+module brick(size, type, kind, studs = true, sockets = true, inputStl = "", inputStlOffset = [0,0,0], mirrorZ = 0, floorTx = "") {
   union() {
-    maybe_apply_sockets(size, sockets) brick_cut(size, kind)  
+    maybe_apply_sockets(size, sockets) brick_cut(size, type)  
       union() { 
         // ***  This is a remix  ***
         if (inputStl != "") { 
-          if (kind == "Wall") { 
+          if (type == "Wall") { 
             socket_mirror([size.x * U, size.y * U, mirrorZ]) translate(TR + inputStlOffset) import(inputStl, convexity = 50);
             translate([ -0.5 * U, -4.2, 0 ]) cube([ size.x, size.y -1 , 0.5 ] * U + [0, 8.4, 0]);
           } else if (size.z < 0.5 ) { 
