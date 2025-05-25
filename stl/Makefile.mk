@@ -9,10 +9,3 @@ $(SUBDIRS):
 
 %.stl: %.json
 	openscad --backend Manifold -p $< -P $(basename $(notdir $@)) -o $@ $(SCAD_DIR)/bricks.scad
-
-.PHONY: clean distclean
-clean: 
-	rm -f *.stl
-
-distclean: clean
-	rm -f *.json

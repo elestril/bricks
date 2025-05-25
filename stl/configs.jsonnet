@@ -8,7 +8,7 @@ local brick = function(kind, x,y,z) {
 
 local hex = function(class, kind, x,z) brick(kind, x, 0, z) + { 
   class: class,
-  name: self.class + '-' + self.kind + '-' + x,
+  name: self.kind + '-' + self.class + '-' + x,
   size: '%s' % [[x, 0, z]],
   stl: 'Hex-' + self.kind + 's/' + self.name + '.stl'
 };
