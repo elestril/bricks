@@ -1,6 +1,6 @@
 include <params.scad>;
-use <brick.scad>;
-use <hex.scad>;
+include <brick.scad>;
+include <hex.scad>;
 
 // Parameters
 

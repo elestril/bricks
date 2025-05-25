@@ -1,6 +1,7 @@
+include <BOSL2/std.scad>;
 include <params.scad>;
-use <stud.scad>;
-use <texture.scad>;
+include <stud.scad>;
+include <texture.scad>;
 
 // Brick, with the first grid position centered on 0,0o
 TR = [-0.5,-0.5,0] * U;
@@ -36,10 +37,10 @@ module brick_cut(size, type = "Generic") {
     }
   } else if (type == "Tile") { 
     // Allow slightly higher profile on tiles
-    translate(TR) cube(size * U + [0,0,2]);
+    translate(TR) cuboid(size * U + [0,0,2], anchor = FRONT+LEFT+BOTTOM, chamfer=0.8, edges=BOTTOM);
   } else { 
     // Cut to nominal size
-     translate(TR) cube(size * U);
+     translate(TR) cuboid(size * U, anchor = FRONT+LEFT+BOTTOM, chamfer=0.8, edges=BOTTOM);
   }
   children();
   }
