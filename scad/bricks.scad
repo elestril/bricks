@@ -4,10 +4,10 @@ include <hex.scad>;
 
 // Parameters
 
-// Kind of brick to generate
-class = "Brick";
-type = "Wall";
-kind = "None";
+// label of brick to generate
+type = "Brick";
+subtype = "Wall";
+label = "None";
 studs = true;
 sockets = true;
 grid = true;
@@ -32,10 +32,10 @@ floorTx = "";
 
 module __Customizer_Limit__ () {}  // Hide following assignments from Customizer.
 
-if (class == "Brick") { 
-  brick(size, type, kind, studs, sockets, inputStl, inputStlOffset, mirrorZ, floorTx);
-} else if (class == "Hex-R") { 
-  hex_r(size, type, kind, studs, sockets);
-} else if (class == "Hex-S") { 
-  hex_s(size, type, kind, studs, sockets);
+if (type == "Brick" ) { 
+  brick(size, subtype, label, studs, sockets, inputStl, inputStlOffset, mirrorZ, floorTx);
+} else if (type == "Hex-R") { 
+  hex_r(size, subtype, label, studs, sockets);
+} else if (type == "Hex-S") { 
+  hex_s(size, subtype, label, studs, sockets);
 }

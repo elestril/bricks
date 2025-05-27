@@ -1,17 +1,18 @@
 #!/usr/bin/python3
 
 import copy
-import glob
 import json
 import numpy as np
 import re
 import shlex
 import stl
+
 import sys
 import pathlib
 
 from absl import app, flags
 from absl.logging import log, WARNING, INFO, DEBUG
+from string import Template
 from typing import Optional, Dict, List
 
 
@@ -21,16 +22,13 @@ MODULES = {
   'plates': 'Create the standard plates', 
   'walls': 'Create the  standard walls',
   'tiles': 'Create the standard tiles',
-  'textures': 'Turn the input files into textures', 
-  'remix': 'Remix the input files into Dungeonbricks', 
 }
 
 
 FLAGS = flags.FLAGS
-flags.DEFINE_spaceseplist('input', None, 'Path(s) to input stl files')
-flags.DEFINE_bool('recursive', False, 'Whether to create a recursive hierarchy of json files')
+flags.DEFINE_string('input', None, 'Path glob to input stl files')
 
-flags.DEFINE_spaceseplist('modules', 'all', 'Which modules to create:\n' + json.dumps(MODULES, indent=4))
+flags.DEFINE_spaceseplist('modules', ['all'], 'Which modules to create:\n' + json.dumps(MODULES, indent=4))
 flags.register_validator('modules', lambda vals: all([val in MODULES for val in vals]), message=f'--module must be one or multiple of {MODULES.keys}')
 
 flags.DEFINE_string('output', '.', 'Output directory or "-" for dumping config to stdout.')
@@ -52,22 +50,26 @@ CUSTOMIZER_TMPL = {
 
 U = 12.7  # grid unit is 1/2in 
 
-RAMPAGE_RE = re.compile(r'(?P<name>(?P<code>\w+)(-(?P<kind>[A-Z]\w+))?(-(?P<set>[A-Z]\w+))?.*).stl')
+RAMPAGE_RE = re.compile(r'(?P<code>\w+)(?:-(?P<kind>[A-Z]\w+))?(?:-(?P<set>[A-Z]\w+))?.*.stl')
 GENERIC_RE = re.compile(r'(?P<name>.*).stl')
 
-OPENLOCK_CONFIG_TMPL = { 
-  '*': { 
-    '*':  {'type': 'Wall', 'studs': True, 'sockets': True, 'mirrorZ': 7.2},
-    'A':  {'size': [4, 1, 4]},
-    'AS': {'size': [4, 1, 4]},
-    'L': {'size': [1, 1, 4]},
+RAMPAGE_CONF = { 
+  'code' : { 
+    'A' : {'x': 4, 'y': 1},
+    'AS': {'x': 4, 'y': 1},
+    'E': {'x': 4, 'y': 4},
+    'L': {'x': 1, 'y': 1},
   },
-  'Floor': { 
-    '*':  {'type': 'Tile', 'studs': False, 'sockets': True},
-    'E': {'size': [4,4,0.25]},
+  'kind' : {
+    'Window': {'type' : 'Brick', 'subtype': 'Wall', 'z': 4, 'mirrorZ': 7.2, 'label': '{kind}'},
+    'Wall': {'type': 'Brick', 'subtype': 'Wall', 'z': 4, 'mirrorZ': 7.2, 'label': '{kind}'},
+    'Column': {'type': 'Brick', 'subtype': 'Wall', 'z': 4, 'label': '{kind}{code}'},
+    'Floor' : {'type': 'Brick', 'subtype': 'Tile', 'label': 'Tile', 'studs': False, 'z': 0.25, 'inputStlOffset': [0,0,-4.2]}
   },
-  'Roof': None,
-  'RoofEnd': None,
+  'set': { 
+    'Schlist': {'set': 'Schist'},
+    '*': {'set': '{set}'}
+  }
 }
 
 MAKEFILE_TMPL = """
@@ -77,65 +79,119 @@ include {includedMakefile}
 
 #### Code ####
 
-
 class ConfigNotFound(KeyError):
   pass
 
+class Brick:
 
-class Brick(object): 
-  def __init__(self, size, cls='Brick', type='Wall', subtype=None, set='Blank', name=None):
-    self.cls = cls
+  def __init__(self, name = None, type = None, subtype = None, label = None, studs=None, sockets = True, 
+               size = (4,1,4), grid = None, inputStl = None, inputStlOffset=(0,0,0), mirrorZ=0):
+    self._name = name
     self.type = type
     self.subtype = subtype
-    self.set = set
-    self.size = list(size)
-    self._name = None
+    self.label = label
+    self.studs = studs 
+    self.sockets = sockets
+    self.size  = list(size)
+    self.grid = grid
+    self.inputStl = inputStl
+    self.inputStlOffset = list(inputStlOffset)
+    self.mirrorZ = mirrorZ
 
   @property
-  def name(self):
+  def name(self) -> str:
     if (self._name):
       return self._name
 
-    if self.cls in ('Hex-R', 'Hex-S'):
-      ne = [self.set, self.type, self.subtype, f'{self.cls}{self.x}']
+    if self.type in ('Hex-R', 'Hex-S'):
+      ne = [self.set, self.label, f'{self.type}{self.x}']
     else:
-      ne = [self.set, self.type, self.subtype, f'{self.x}x{self.y}']
+      ne = [self.set, self.label, f'{self.x}x{self.y}']
     return '-'.join([str(n) for n in ne if n is not None])
+
+  @property
+  def stl(self) -> pathlib.Path: 
+    return pathlib.Path(self.set, self.subtype + 's').joinpath(self.name.__str__() + '.stl')
 
   @property
   def x(self): 
     return self.size[0]
-  
+
   @property
   def y(self): 
     return self.size[1]
-  
+
   @property
-  def z(self):
+  def z(self): 
     return self.size[2]
 
-  @property
-  def stl(self): 
-    return pathlib.Path(self.set, self.type + 's').joinpath(self.name + '.stl')
+  @x.setter
+  def x(self, val) -> None:
+    self.size[0] = val
 
-  @property
-  def studs(self): 
-    return self.type != 'Tile'
+  @y.setter
+  def y(self, val) -> None:
+    self.size[1] = val
 
-  @property
+  @z.setter
+  def z(self, val) -> None:
+    self.size[2] = val
+
+  def update(self, update: Dict):
+    for (k,v) in update.items():
+      setattr(self, k, v)
+
   def config(self): 
-    return { 
-      'class': self.cls, 
-      'type': self.type, 
-      'subtype': self.subtype,
-      'set': self.set,
-      'name': self.name,
-      'size': str(self.size),
-      'stl': str(self.stl),
-      'studs': self.studs,
-    }
+    return {
+      k: v if type(v) in (int, float, str, bool) else str(v) for (k,v) in 
+        {attr: getattr(self, attr) for attr in 
+          ('name', 'type', 'subtype', 'label', 'studs', 'sockets', 'grid', 'size', 'inputStl', 'inputStlOffset', 'mirrorZ') 
+        }.items() 
+      if v is not None
+    } 
 
+  def validate(self):
+    errors = []
+    for a in ['type', 'subtype', 'label']:
+      if getattr(self, a) is None: 
+        errors.append(a)
+    if errors: 
+      raise KeyError(f'{self.name}: Attributes not configured: {errors}')
+        
+    
+class Config(object): 
+  def __init__(self, name, *, regex: re.Pattern  = None, pathT: str = None, conf: Dict = None):
+    self.name = name
+    self.regex = regex
+    self.pathT = pathT
+    self.conf = conf
 
+  def match2Brick(self, filename) -> Optional[Brick]:
+    """Match a name to the regex and return a resolved config dict or None."""
+
+    file = pathlib.Path(filename)
+    match = self.regex.fullmatch(file.name)
+    if not match:
+      return None
+
+    log(DEBUG, '%s match: %r', file.name, match.groupdict())
+
+    brick = Brick()
+    brick.inputStl = file
+    for (group, matched) in match.groupdict().items():
+      update = copy.deepcopy(self.conf[group].get(matched, self.conf[group].get('*', None)))
+      if update is None:
+        continue
+      for (k,v) in update.items():
+        if type(v) is str:
+          update[k] = v.format(**match.groupdict())
+      log(DEBUG, '%s: Update for group %s:%s %r', file.name, group, matched, update)
+      brick.update(update)
+
+    log(DEBUG, '%s: match2Brick: %r', file, str(brick))
+    brick.validate()
+    return brick
+  
 def generateBricks() -> Dict: 
 
   s = FLAGS.max_size + 1
@@ -145,91 +201,29 @@ def generateBricks() -> Dict:
   if 'all' in FLAGS.modules or 'plates' in FLAGS.modules:
     configs.update({
       b.name:b for b in [
-        Brick((x, y, 0.25), type='Plate') for x in range(1,s) for y in range(1,s) if x>=y]
+        Brick(x, y, 0.25, type='Brick', subtype='Plate') for x in range(1,s) for y in range(1,s) if x>=y]
     })
     configs.update({
       b.name: b for b in [
-        Brick((x, 0, 0.25), type='Plate', cls=cls) for x in range(1,r) for cls in ('Hex-R', 'Hex-S')] 
+        Brick(x, 0, 0.25, type=type, subtype='Plate') for x in range(1,r) for type in ('Hex-R', 'Hex-S')] 
     })
   if 'all' in FLAGS.modules or 'tiles' in FLAGS.modules:
     configs.update({
       b.name:b for b in [
-        Brick((x, y, 0.25), type='Tile') for x in range(1,s) for y in range(1,s) if x>=y]
+        Brick(x, y, 0.25, type='Brick', subtype='Tile') for x in range(1,s) for y in range(1,s) if x>=y]
     })
     configs.update({
       b.name: b for b in [
-        Brick((x, 0, 0.25), type='Tile', cls=cls) for x in range(1,r) for cls in ('Hex-R', 'Hex-S')] 
+        Brick(x, 0, 0.25, type=type, subtype='Tile') for x in range(1,r) for type in ('Hex-R', 'Hex-S')] 
     })
   if 'all' in FLAGS.modules or 'walls' in FLAGS.modules:
     configs.update({
-      b.name:b for b in [Brick((x, 1, 4), type='Wall') for x in range(1,s)]
+      b.name:b for b in [Brick(x, 1, 4, type='Brick', subtype='Wall') for x in range(1,s)]
     })
     configs.update({
-      b.name:b for b in [Brick((x, 1, 2), type='LowWall') for x in range(1,s)]
+      b.name:b for b in [Brick(x, 1, 2, type='Brick', subtype='LowWall') for x in range(1,s)]
     })
   return configs
-
-
-def tmpl2Conf(template: Dict, info: Dict) -> Optional[Dict]: 
-  """Lookup config in template.
-  
-  raises: KeyError when no matching config exists.
-
-  """
-  config = {}
-  config['kind'] = info['kind']
-
-  tmpl = template.get(info['kind'], template['*'])
-  if not tmpl: 
-    raise ConfigNotFound(info['kind'])
-
-  try:
-    config.update(tmpl['*'])
-    config.update(tmpl[info['code']])
-  except KeyError as e:
-    raise ConfigNotFound(str(e))
-
-  log(DEBUG, 'tmpl2conf: %r %r', template, config)
-  return config
-
-def stl2Config(filename: str) -> Optional[Dict]:
-  'Produce an scad customizer json file from an stl to parametrize the remix.'
-
-  filepath = pathlib.Path(filename).resolve()
-  basename = pathlib.Path(filename).name
-
-  conf = {'inputStl': str(filepath)}
-
-  if match := RAMPAGE_RE.fullmatch(basename):
-    conf['set'] = match.group('set')
-    fromTmpl = tmpl2Conf(OPENLOCK_CONFIG_TMPL, match.groupdict())
-    log(DEBUG, "fromTmpl: %r", fromTmpl)
-    conf.update(fromTmpl)
-  elif match := GENERIC_RE.fullmatch(basename): 
-    conf['kind'] = None
-    conf['set'] = None
-  else: 
-    raise KeyError('not matching any known pattern')
-
-  msh = stl.mesh.Mesh.from_file(filename)
-
-  inputStlOffset = msh.min_
-  if (conf['type'] == 'Tile'):
-    inputStlOffset[2] = -msh.max_[2] + 4.0
-  conf['inputStlOffset'] = [round(v,2) for v in inputStlOffset.tolist()]
-
-  stlSize = np.round(((msh.max_ - msh.min_) * 2 / U )/ 2).tolist()
-
-  # if (stlSize != conf['size']):
-  #   raise ConfigNotFound('Size of stl %r differs from template size %r', stlSize, conf['size'])
-
-  if FLAGS.rename:
-    conf['name'] = f"{conf['kind']}-{conf['set']}-{conf['size'][0]}x{conf['size'][1]}"
-  else:
-    conf['name'] = basename.split()[0]
-
-  conf['stl'] = conf['name'] + '.stl'
-  return conf
 
 
 def writeJsonConfigs(bricks):
@@ -248,11 +242,14 @@ def writeJsonConfigs(bricks):
 
   if (FLAGS.individual_configs): 
     for (name, brick) in bricks.items():
-      conf = brick.config
+
+      conf = brick.config()
       conf['stl'] = brick.stl.name
+      conf['inputStl'] = str(brick.inputStl.resolve())
+
       jf = brick.stl.parent.joinpath(brick.stl.stem + '.json')
 
-      outpaths.update(brick.stl.parents[:])
+      outpaths.update(list(brick.stl.parents))
 
       log(DEBUG, '%s: %r', name, conf)
       try: 
@@ -267,7 +264,7 @@ def writeJsonConfigs(bricks):
       cconf = copy.deepcopy(CUSTOMIZER_TMPL)
       cconf['parameterSets'][name] = conf
       
-      log(DEBUG, '%s: writing config %r', name, cconf)
+      log(INFO, '%s: writing config %r', name, cconf)
       jf.parent.mkdir(parents=True, exist_ok=True)
       with open(jf, 'w') as jfd:
         json.dump(cconf, jfd, indent=2, sort_keys=True)
@@ -284,47 +281,26 @@ def writeJsonConfigs(bricks):
       with open(op.joinpath("Makefile"), "w") as out:
         out.write(MAKEFILE_TMPL.format(includedMakefile=inclMake))
 
-def main(argv: List[str]): 
-  input = argv[1:]
+def main(argv): 
+  del argv
 
   output = pathlib.Path(FLAGS.output)
 
   bricks = {}
   bricks.update(generateBricks())
-  writeJsonConfigs(bricks)
 
-  return
-
-  for stlfile in input:
-    stlParams = {
-          'parameterSets': {},
-          'fileFormatVersion': '1',
-        }
-    try:  
-      conf = stl2Config(stlfile)
-    except ConfigNotFound as e:
-      log(WARNING, '%s: No matching config in template: %s', stlfile, e)
-      continue
-
-    # scad customizer expects vectors as string represenation.
-    for (k,v) in conf.items():
-      if isinstance(v, list) :
-        conf[k] = repr(v)
-    stlParams['parameterSets'][conf['name']] = conf
-    params['parameterSets'][conf['name']] = conf
-    if (FLAGS.individual_configs): 
-      with open(output.joinpath(conf['name'] + '.json'), 'w') as out:
-        json.dump(stlParams, out, indent=2, sort_keys=True)
-        log(INFO, '%s: SUCCESS %s', stlfile, out.name)
-    
-  confJ = json.dumps(params, indent=2, sort_keys=True)
-  log(DEBUG, confJ)
-
-  if (FLAGS.combined_config):
-    with open(output.joinpath('config.json'), 'w') as out:
-      out.write(confJ)
-
+  config = Config('rampage', regex=RAMPAGE_RE, conf=RAMPAGE_CONF)
   
+  log(DEBUG, 'input: %s', FLAGS.input)
+
+  for infile in pathlib.Path('.').glob(FLAGS.input): 
+    try:
+      brick = config.match2Brick(infile)
+      bricks[brick.name] = brick
+    except Exception as e:
+      log(WARNING, "%s: Skipping. %s", infile, e)
+
+  writeJsonConfigs(bricks)
 
 if __name__ == '__main__':
   app.run(main)

@@ -51,7 +51,7 @@ module hex_base(z = 0.25, stud = true, socket = true) {
   linear_extrude(height = z * U) circle(r = U, $fn = 6);
 }
 
-module hex_r(size, type, kind, studs, sockets, grid = true) {
+module hex_r(size, subtype, label, studs, sockets, grid = true) {
   intersection() {
     hex_sockets(size.x * 2 + 1, sockets, 
     edge_blank = (size.x > 1), 
@@ -67,7 +67,7 @@ module hex_r(size, type, kind, studs, sockets, grid = true) {
   }
 }
 
-module hex_s(size, type, kind, studs, sockets, grid = true) {
+module hex_s(size, subtype, label, studs, sockets, grid = true) {
   intersection() {
     hex_sockets(size.x * 2 + 1, sockets, edge_blank = false, fit = size.z > 0.25 ? "snug" : "loose") union() {
       hex_grid(size, grid) rotate([0,0,30]) linear_extrude(height = size.z * U) circle(r = sqrt(3) * size.x  * U, $fn = 6);
