@@ -1,0 +1,31 @@
+fileinfo: 
+  type: REMIX
+  name: rampage
+
+brickinfo:
+
+regex:
+  - '(?P<code>\w+)(?:-(?P<kind>[A-Z]\w+))?(?:-(?P<set>[A-Z]\w+))?.*.stl'
+
+config:
+  '*': 
+    homepage: http://printablescenery.com
+    license: commercial 
+  code: 
+    A:  {x: 4, y: 1} 
+    AS: {x: 4, y: 1}
+    E:  {x: 4, y: 4}
+    L:  {x: 1, y: 1}
+  kind:
+    Window: {type: Brick, subtype: Wall, z: 4,    label: '{kind}', mirrorZ: 7.2}
+    Wall:   {type: Brick, subtype: Wall, z: 4,    label: '{kind}', mirrorZ: 7.2}
+    Column: {type: Brick, subtype: Wall, z: 4,    label: '{kind}{code}'}
+    Floor : {type: Brick, subtype: Tile, z: 0.25, label: 'Tile', 'studs': False, 'inputStlOffset': [0,0,-4.2]}
+  set:
+    Schlist: {set: Schist}
+    '*': {set: '{set}'}
+
+
+
+
+
