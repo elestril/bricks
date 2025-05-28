@@ -2,8 +2,6 @@ fileinfo:
   type: REMIX
   name: rampage
 
-brickinfo:
-
 regex:
   - '(?P<code>\w+)(?:-(?P<kind>[A-Z]\w+))?(?:-(?P<set>[A-Z]\w+))?.*.stl'
 
