@@ -59,28 +59,6 @@ yaml = YAML()
 
 U = 12.7  # grid unit is 1/2in 
 
-RAMPAGE_RE = re.compile(r'(?P<code>\w+)(?:-(?P<kind>[A-Z]\w+))?(?:-(?P<set>[A-Z]\w+))?.*.stl')
-GENERIC_RE = re.compile(r'(?P<name>.*).stl')
-
-RAMPAGE_CONF = { 
-  'code' : { 
-    'A' : {'x': 4, 'y': 1},
-    'AS': {'x': 4, 'y': 1},
-    'E': {'x': 4, 'y': 4},
-    'L': {'x': 1, 'y': 1},
-  },
-  'kind' : {
-    'Window': {'type' : 'Brick', 'subtype': 'Wall', 'z': 4, 'mirrorZ': 7.2, 'label': '{kind}'},
-    'Wall': {'type': 'Brick', 'subtype': 'Wall', 'z': 4, 'mirrorZ': 7.2, 'label': '{kind}'},
-    'Column': {'type': 'Brick', 'subtype': 'Wall', 'z': 4, 'label': '{kind}{code}'},
-    'Floor' : {'type': 'Brick', 'subtype': 'Tile', 'label': 'Tile', 'studs': False, 'z': 0.25, 'inputStlOffset': [0,0,-4.2]}
-  },
-  'set': { 
-    'Schlist': {'set': 'Schist'},
-    '*': {'set': '{set}'}
-  }
-}
-
 MAKEFILE_TMPL = """
 include {includedMakefile}
 
@@ -167,23 +145,27 @@ class Config(object):
     else:
       return None
 
-    log(DEBUG, '%s match: %r', file.name, match.groupdict())
-
+    def applyUpdate(brick: Brick, update: Dict, formatVars: Dict):
+      if not update:
+        return
+      
     brick = Brick()
     brick.inputStl = file
-    if '*' in self.config: 
-      brick.update(self.config['*'])
-    
-    for (group, matched) in match.groupdict().items():
-      update = copy.deepcopy(self.config[group].get(matched, self.config[group].get('*', None)))
-      if update is None:
-        continue
-      for (k,v) in update.items():
-        if type(v) is str:
-          update[k] = v.format(**match.groupdict())
-      log(DEBUG, '%s: Update for group %s:%s %r', file.name, group, matched, update)
-      brick.update(update)
+    update = {}
 
+    if '*' in self.config: 
+      update.update(self.config['*'])
+    for (group, matched) in match.groupdict().items():
+      update.update(self.config[group].get('*', {}))
+      update.update(self.config[group].get(matched, self.config[group].get('_', {})))
+    
+    for (k,v) in update.items():
+        if type(v) is str:
+          update[k] = v.vformat(match.groupdict())
+        else:
+          update[k] = v
+    brick.update(update)
+      
     log(DEBUG, '%s: match2Brick: %r', file, str(brick))
     return brick
   

@@ -21,7 +21,7 @@ config:
     Floor : {type: Brick, subtype: Tile, z: 0.25, label: 'Tile', 'studs': False, 'inputStlOffset': [0,0,-4.2]}
   set:
     Schlist: {set: Schist}
-    '*': {set: '{set}'}
+    '_': {set: '{set}'}
 
 
 
