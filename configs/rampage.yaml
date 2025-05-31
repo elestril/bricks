@@ -3,33 +3,44 @@ fileinfo:
 
 regex:
   # A-TRP-BrickWall-Low-v4.0.stl
-  - '((?P<kind>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-TRP)?-(?P<set>[A-Z]\w+)(-(?P<mod>[A-Z]\w+))?-v\d\.\d.stl' 
+  - '((?P<kind>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-TRP)?-(?P<set>[A-Z]\w+)(?:-(?P<mod>[A-Z][a-z]+))?-v\d.\d.stl' 
   # A-Wall-Schist-v2.0.stl
-  - '(?P<code>[A-Z]+)-(?P<kind>[A-Z]\w+)-(?P<set>[A-Z]\w+)-v\d\.\d.stl'
+  # - '(?P<code>[A-Z]+)-(?P<kind>[A-Z]\w+)-(?P<set>[A-Z]\w+)-v\d\.\d.stl'
 
 config:
   '*': 
     homepage: http://printablescenery.com
     license: commercial 
   code: 
-    A:  {x: 4, y: 1} 
-    BA: {x: 3, y: 1}
-    C:  {x: 5, y: 1}
-    D:  {x: 6, y: 1}
-    E:  {x: 4, y: 4}
-    IA: {x: 2, y: 1}
-    L:  {x: 1, y: 1}
-  kind/mod:
-    Window: {type: Brick, subtype: Wall, z: 4,    label: '{kind}{mod}', mirrorZ: 7.2}
-    Wall:   {type: Brick, subtype: Wall, z: 4,    label: '{kind}{mod}', mirrorZ: 7.2}
-    Column: {type: Brick, subtype: Wall, z: 4,    label: '{kind}{mod}{code}'}
+      A:  {x: 4, y: 1} 
+      BA: {x: 3, y: 1}
+      C:  {x: 5, y: 1}
+      D:  {x: 6, y: 1}
+      E:  {x: 4, y: 4}
+      IA: {x: 2, y: 1}
+      L:  {x: 1, y: 1}
+      P:  False
+      X:  {x: 1, y: 1}
+  kind:
+    Window: {type: Brick, subtype: Wall, z: 4,    label: '{match.kind}{match.mod}', mirrorZ: 7.2}
+    Wall:   {type: Brick, subtype: Wall, z: 4,    label: '{match.kind}{match.mod}', mirrorZ: 7.2}
+    Column: {type: Brick, subtype: Wall, z: 4,    label: '{match.kind}{match.mod}{match.code}'}
     Floor : {type: Brick, subtype: Tile, z: 0.25, label: 'Tile', 'studs': False, 'inputStlOffset': [0,0,-4.2]}
-    _: {type: Brick, subtype: Wall, z: 4,    label: 'Wall{mod}', mirrorZ: 7.2}
-  mod:
-    Low: {z: 2}
+    _: {type: Brick, subtype: Wall, z: 4,   label: 'Wall{match.mod}', mirrorZ: 7.2}
+  kind/mod:
+    Wall/Low: {z: 2}
+  kind/code:
+    Wall/G: &WallRound {label: '{match.kind}{match.mod}Round'}
+    Wall/P: *WallRound
+    Wall/X: *WallRound
+    Wall/Z: *WallRound
+    _/G: *WallRound 
+    _/X: *WallRound 
+    _/Z: *WallRound 
   set:
+    '*': {set: '{match.set}'}
     Schlist: {set: Schist}
-    _: {set: '{set}'}
+    Balcony: {studs: False, z: None}
   code/set: 
     C/BrickWall: {rot: [0,0,180]}
     D/BrickWall: {rot: [0,0,180]}

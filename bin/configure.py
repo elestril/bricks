@@ -1,12 +1,15 @@
 #!/usr/bin/python3
 
+import collections
 import datetime
 import copy
 import json
 import numpy as np
 import re
+import logging as pylogging
 import shlex
 import stl
+import io
 
 import sys
 import pathlib
@@ -42,6 +45,7 @@ CUSTOMIZER_TMPL = {
 
 yaml = YAML()
 SCADPATH = None
+STATS=collections.defaultdict(collections.Counter)
 
 #### Config ####
 
@@ -54,28 +58,17 @@ include {includedMakefile}
 
 #### Code ####
 
-class ConfigNotFound(KeyError):
+
+class InvalidBrick(ValueError):
   pass
 
-
-class Log():
-  _LOGFD = None
-  _instance = None
-
-  def __new__(cls): 
-    if cls._instance is None:
-      cls._instance = super(Log, cls).__new__(cls)
-      cls._LOGFD = open(FLAGS.logfile, 'w')
-    return cls._instance
-  
-  def __call__(self, msg):
-    self._LOGFD.write(msg + '\n')
-
+class FormatDict(collections.OrderedDict): 
+  def __getattr__(self, attr):
+    return self.__getitem__(attr)
 
 class Brick:
-
   # These need to be set for the brick to be valid.
-  REQUIRED_FIELDS = ('type', 'subtype', 'label', 'set', 'x', 'y', 'z')
+  REQUIRED_FIELDS = ('name', 'type', 'subtype', 'label', 'set', 'x', 'y', 'z')
 
   def __init__(self, **kwds):
     self.__dict__['_conf'] = { 
@@ -83,7 +76,6 @@ class Brick:
     }
     self._conf.update(kwds)
     
-
   def __getattr__(self, attr) -> Any:
     match attr:
       case 'x': return self.size[0]
@@ -107,7 +99,7 @@ class Brick:
     if self.type in ('Hex-R', 'Hex-S'):
       ne = [self.set, self.label, f'{self.type}{self.x}']
     else:
-      ne = [self.set, self.label, f'{self.x}x{self.y}']
+      ne = [self.set, self.label, f'{self.x:g}x{self.y:g}']
     return '-'.join([str(n) for n in ne if n is not None])
 
   def getStl(self) -> pathlib.Path: 
@@ -123,13 +115,12 @@ class Brick:
       self._conf.items()
     } 
 
-  def isValid(self):
+  def validate(self):
     missing = [k for k in self.REQUIRED_FIELDS if not getattr(self, k)]
     if missing:
-      logging.debug('%s: Missing fields: %r', self.name, missing)
-      return False
+      raise InvalidBrick(f'{self.name}: Missing fields: {missing}')
     return True
-        
+
     
 class Config(object): 
   def __init__(self, yml: pathlib.Path): 
@@ -149,15 +140,27 @@ class Config(object):
     file = pathlib.Path(filename)
     for match in [r.fullmatch(file.name) for r in self.regex]:
       if match:
-        logging.debug('match: re:%s match:%r', match.re, match.groupdict())
+        logging.debug('regex match: %r', match.groupdict(''))
         break
     else:
-      logging.debug('%s: NO matching regex in %s', file.name, self.name) 
-      return None
-      
+      raise InvalidBrick(f'{file.name} does not match any regex')
+
     brick = Brick()
     brick.inputStl = file
-    bupdate = {}
+
+
+    mesh = stl.Mesh.from_file(file)
+    brick.update({
+      'inputStlMin': mesh.min_.tolist(), 
+      'inputStlMax': mesh.max_.tolist()}) 
+    size  = [round(c) / 4 for c in ((mesh.max_ - mesh.min_) * 4.0 / U ).tolist()]
+ 
+    format_vars = {
+        'path': FormatDict({i: f for (i,f) in enumerate(file.parts[-1:-4:-1])}),
+        'match': FormatDict(match.groupdict(''))
+    }
+
+    bupdate = collections.OrderedDict()
 
     for (group) in self.config:
       subconf = self.config[group]
@@ -167,20 +170,29 @@ class Config(object):
 
       matchgroups = group.split('/')
       subkey = '/'.join([match.groupdict('')[g] for g in matchgroups])
-      bupdate.update(subconf.get('*', {}))
-      bupdate.update(subconf.get(subkey, subconf.get('_', {})))
-   
+
+      scval = subconf.get('*', {})
+      if scval == False:
+        raise InvalidBrick(f'{file}: Config for {group}:{subkey} set to "False"') 
+      bupdate.update(scval)
+        
+      scval = subconf.get(subkey, subconf.get('_', {}))
+      if scval == False:
+        raise InvalidBrick(f'{file}: Config for {group}:{subkey} set to "False"') 
+      bupdate.update(scval)
+
+    format_vars['config'] = FormatDict(bupdate)
+    logging.debug('format_vars:%s', [f'{vname}.{a}:{val}' for (vname,v) in format_vars.items() for (a,val) in v.items()])
     for (k,v) in bupdate.items():
       if type(v) is str:
-        bupdate[k] = v.format(**match.groupdict(''))
+        bupdate[k] = v.format(**format_vars)
+
     brick.update(bupdate)
-      
-    if brick.isValid():
-      logging.debug('%s: remix: %r', file, str(brick.config()))
-      return brick
-    else:
-      logging.debug('%s: invalid: %r', file, brick.config())
-      return None
+    brick.validate()
+    return brick
+
+  def __str__(self): 
+    return self.name
   
 def generateBricks() -> Dict: 
 
@@ -217,8 +229,7 @@ def generateBricks() -> Dict:
 
 
 def writeJsonConfigs(bricks):
-  log = Log()
-  log('')
+  global STATS
 
   if FLAGS.output == '-': 
     conf = copy.deepcopy(CUSTOMIZER_TMPL)
@@ -250,15 +261,17 @@ def writeJsonConfigs(bricks):
       except: 
         oldConf = {}
       if (oldConf.get('parameterSets', {}).get(name, {}) == conf):
-        log(f'{jf}: No changes')
+        logging.info(f'{jf}: No changes')
+        STATS[brick.set]['unchanged'] += 1
         continue
 
       cconf = copy.deepcopy(CUSTOMIZER_TMPL)
       cconf['parameterSets'][name] = conf
       
-      log(f'{jf}: Updated')
+      logging.info(f'{jf}: Updated')
       jf.parent.mkdir(parents=True, exist_ok=True)
       with open(jf, 'w') as jfd:
+        STATS[brick.set]['written'] += 1
         json.dump(cconf, jfd, indent=2, sort_keys=True)
 
   if (FLAGS.combined_json):
@@ -275,15 +288,17 @@ def writeJsonConfigs(bricks):
 
 def main(argv): 
   global SCADPATH
+  global STATS
 
   SCADPATH = pathlib.Path(FLAGS.scadpath).resolve()
 
   output = pathlib.Path(FLAGS.output)
-  log = Log()
 
+  logging.get_absl_handler().setFormatter(pylogging.Formatter(
+    fmt=None
+  ))
   remix = []
-
-  log(f'{datetime.datetime.now().isoformat()}: {" ".join(sys.argv)}')
+  logging.info(f'{datetime.datetime.now().isoformat()}: {" ".join(sys.argv)}')
 
   for yml in [pathlib.Path(FLAGS.confpath).joinpath(f'{c}.yaml') for c in FLAGS.config]:
     try:
@@ -302,14 +317,25 @@ def main(argv):
   for infile in pathlib.Path('.').glob(FLAGS.remix_input): 
     logging.debug("remixing %s", infile)
     for config in remix:
-      if (brick := config.remix(infile)):
-        bricks[brick.name] = brick 
-        log(f'{infile.name}: remixing as {brick.name}, config {config.name}')
+      try:
+        brick = config.remix(infile)
+        logging.info('%s: remixing as %s, config %s. %s', infile.name, brick.name, config.name, brick.config() if logging.level_debug() else '')
+        if brick.name in bricks:
+          logging.warning("%s: Brick %s already exists, ignoring", infile, brick.name)
+          STATS[config]['duplicate'] += 1
+        else:
+          bricks[brick.name] = brick
+          STATS[config]['valid'] += 1
         break
-      else:
-        log(f'{infile.name}: no matching remix config')
+      except InvalidBrick as e:
+        logging.info('%s: cannot remix with config %s: %s ', infile.name, config.name, e)
+        STATS[config]['invalid'] += 1
 
   writeJsonConfigs(bricks)
+
+  with io.StringIO() as ybuf:
+    yaml.dump({str(k): dict(v) for (k,v) in STATS.items()}, ybuf)
+    logging.info('\n\n**** STATS ****\n\n%s', ybuf.getvalue())
 
 if __name__ == '__main__':
   app.run(main)

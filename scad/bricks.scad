@@ -23,7 +23,10 @@ name = "";
 inputStl = "";
 
 // Offset of the input stl to normalize with the brick grid
-inputStlOffset = [0,0,0]; // [-200, 0.1, 200]
+inputStlMin = [0,0,0];
+
+// Offset of the input stl to normalize with the brick grid
+inputStlMax = size * U;
 
 // Mirror z millimeters of the foot to patch any slots
 mirrorZ = 7.0; // [0:0.1:100]
@@ -34,7 +37,7 @@ floorTx = "";
 module __Customizer_Limit__ () {}  // Hide following assignments from Customizer.
 
 if (type == "Brick" ) { 
-  brick(size, subtype, label, studs, sockets, inputStl, inputStlOffset, mirrorZ, floorTx);
+  brick(size, subtype, label, studs, sockets, inputStl, inputStlMin, inputStlMax, mirrorZ, floorTx);
 } else if (type == "Hex-R") { 
   hex_r(size, subtype, label, studs, sockets);
 } else if (type == "Hex-S") { 

@@ -24,4 +24,4 @@ distclean: clean
 
 %.stl: %.json
 	@echo Making $@
-	@openscad --backend Manifold -p $< -P $(basename $(notdir $@)) --export-format binstl -o $@ $(SCAD_DIR)/bricks.scad 2> /dev/null
+	openscad --backend Manifold -p $< -P $(basename $(notdir $@)) --export-format binstl -o $@ $(SCAD_DIR)/bricks.scad
