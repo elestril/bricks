@@ -3,7 +3,7 @@ fileinfo:
 
 regex:
   # A-TRP-BrickWall-Low-v4.0.stl
-  - '((?P<kind>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-TRP)?-(?P<set>[A-Z]\w+)(?:-(?P<mod>[A-Z][a-z]+))?-v\d.\d.stl' 
+  - '((?P<kind>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-(TRP|RPG))?-(?P<set>[A-Z]\w+)(?:-(?P<mod>[A-Z][a-z]+))*-v\d.\d.stl' 
   # A-Wall-Schist-v2.0.stl
   # - '(?P<code>[A-Z]+)-(?P<kind>[A-Z]\w+)-(?P<set>[A-Z]\w+)-v\d\.\d.stl'
 
@@ -12,14 +12,15 @@ config:
     homepage: http://printablescenery.com
     license: commercial 
   'kind':
-    Window: {type: Brick, subtype: Wall, z: 4,    label: '{config.mod}{kind}', mirrorZ: 7.2}
-    Column: {type: Brick, subtype: Wall, z: 4,    label: '{config.mod}{kind}{code}'}
+    Window: {type: Brick, subtype: Wall, z: 4,    label: '{mod}'}
+    Column: {type: Brick, subtype: Wall, x: 1, y: 1, z: 4, label: '{mod}{code}'}
     Floor : {type: Brick, subtype: Tile, z: 0.25, label: 'Tile', 'studs': False, 'inputStlOffset': [0,0,-4.2]}
-    _:      {type: Brick, subtype: Wall, z: 4,    label: '{config.mod}Wall', mirrorZ: 7.2}
+    _:      {type: Brick, subtype: Wall, z: 4,    label: '{mod}', mirrorZ: 7.2}
   'mod':
     Low: &Low {z: 2, studs: False, mod: 'Low'}
   'code': 
       A:  {x: 4, y: 1} 
+      AS: False
       BA: {x: 3, y: 1}
       C:  {x: 5, y: 1}
       D:  {x: 6, y: 1}
@@ -33,20 +34,23 @@ config:
       IX: False
       L:  {x: 1, y: 1}
       P:  False
+      Q:  {x: 8, y: 1}
       S:  False
-      X:  {x: 1, y: 1}
   'set':
-    '*': {set: '{set}'}
     Schlist: {set: Schist}
     Balcony: {studs: False, z: None}
     BrickWall: &castle {set: Castle}
-    CastleDoor: *castle
+    CastleDoor: {set: 'CastleDoor'}
     CastleArch: *castle
     Machicolations:: 'Battlements'
   'path1': 
     'Castle Walls 4.6': *castle
     'Castle Low Wall 2.1': 
         << : [ *castle,  *Low ]
+    'Castle Arches': {set: 'CastleArch'}
+  'path2':
+    'Castle Door': {set: 'CastleDoor'}
+    'Legacy': False
   'code/set': 
     C/BrickWall: {rot: [0,0,180]}
     D/BrickWall: {rot: [0,0,180]}

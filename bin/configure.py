@@ -5,7 +5,7 @@ import datetime
 import copy
 import json
 import numpy as np
-import re
+import regex as re
 import logging as pylogging
 import shlex
 import stl
@@ -143,7 +143,8 @@ class Config(object):
     file = pathlib.Path(filename)
     for match in [r.fullmatch(file.name) for r in self.regex]:
       if match:
-        logging.debug('regex match: %r', match.groupdict(''))
+        logging.debug('regex match: %r', match.capturesdict())
+        logging.debug('regex match: %r', match.groups())
         break
     else:
       raise InvalidBrick(f'{file.name} does not match any regex')
@@ -161,8 +162,8 @@ class Config(object):
     }
     vars = {} 
     vars.update(((f'{k}',v) for (k,v) in meshinfo.items()))
-    vars.update(((f'{k}',v) for (k,v) in match.groupdict('').items()))
-    vars.update(((f'path{i}',v) for (i,v) in enumerate(file.parts[:-4:-1])))
+    vars.update(((f'{k}', ''.join(v)) for (k,v) in match.capturesdict().items()))
+    vars.update(((f'path{i}',v) for (i,v) in enumerate(file.parts[:-5:-1])))
 
     bupdate = collections.OrderedDict(meshinfo)
 
