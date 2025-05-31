@@ -74,6 +74,9 @@ class Log():
 
 class Brick:
 
+  # These need to be set for the brick to be valid.
+  REQUIRED_FIELDS = ('type', 'subtype', 'label', 'set', 'x', 'y', 'z')
+
   def __init__(self, **kwds):
     self.__dict__['_conf'] = { 
       'size': list((None, None, None))
@@ -121,15 +124,17 @@ class Brick:
     } 
 
   def isValid(self):
-    return all((self.type, self.subtype, self.label, self.x, self.y, self.z))
+    missing = [k for k in self.REQUIRED_FIELDS if not getattr(self, k)]
+    if missing:
+      logging.debug('%s: Missing fields: %r', self.name, missing)
+      return False
+    return True
         
     
 class Config(object): 
   def __init__(self, yml: pathlib.Path): 
     y = yaml.load(yml)
-
-    self.name = y['fileinfo']['name']
-    self.tiles = y['fileinfo'].get('tiles', None)
+    self.name = yml.stem
     self.type = y['fileinfo']['type']
 
     if self.type == 'REMIX':
@@ -144,33 +149,37 @@ class Config(object):
     file = pathlib.Path(filename)
     for match in [r.fullmatch(file.name) for r in self.regex]:
       if match:
+        logging.debug('match: re:%s match:%r', match.re, match.groupdict())
         break
     else:
+      logging.debug('%s: NO matching regex in %s', file.name, self.name) 
       return None
       
-    logging.debug('match: re:%s match:%r', match.re, match.groupdict())
     brick = Brick()
     brick.inputStl = file
-    update = {}
+    bupdate = {}
 
-    if '*' in self.config: 
-      update.update(self.config['*'])
-    for (group, matched) in match.groupdict().items():
-      update.update(self.config[group].get('*', {}))
-      update.update(self.config[group].get(matched, self.config[group].get('_', {})))
-    
-    for (k,v) in update.items():
-        if type(v) is str:
-          update[k] = v.format(**match.groupdict())
-        else:
-          update[k] = v
-    brick.update(update)
+    for (group) in self.config:
+      subconf = self.config[group]
+      if group == '*': 
+        bupdate.update(subconf)
+        continue
+
+      matchgroups = group.split('/')
+      subkey = '/'.join([match.groupdict('')[g] for g in matchgroups])
+      bupdate.update(subconf.get('*', {}))
+      bupdate.update(subconf.get(subkey, subconf.get('_', {})))
+   
+    for (k,v) in bupdate.items():
+      if type(v) is str:
+        bupdate[k] = v.format(**match.groupdict(''))
+    brick.update(bupdate)
       
     if brick.isValid():
       logging.debug('%s: remix: %r', file, str(brick.config()))
       return brick
     else:
-      logging.debug('%s: invalid', file)
+      logging.debug('%s: invalid: %r', file, brick.config())
       return None
   
 def generateBricks() -> Dict: 
@@ -235,7 +244,6 @@ def writeJsonConfigs(bricks):
 
       outpaths.update(list(brick.stl.parents))
 
-      logging.debug('%s: %r', name, conf)
       try: 
         with open(jf, 'r') as jfd:
           oldConf = json.load(jfd)
@@ -292,6 +300,7 @@ def main(argv):
   bricks = {}
 
   for infile in pathlib.Path('.').glob(FLAGS.remix_input): 
+    logging.debug("remixing %s", infile)
     for config in remix:
       if (brick := config.remix(infile)):
         bricks[brick.name] = brick 

@@ -1,7 +1,7 @@
 SCAD_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/scad)
 SCAD_FILES := $(wildcard $(SCAD_DIR)/*.scad)
 
-TOPTARGETS := all stl
+TOPTARGETS := all stl clean distclean
 
 SUBDIRS := $(patsubst %/Makefile,%,$(wildcard */Makefile))
 
@@ -13,7 +13,11 @@ stl: $(patsubst %.json,%.stl,$(wildcard *.json))
 $(SUBDIRS):
 	$(MAKE) -C $@ $(MAKECMDGOALS)
 
-.PHONY: all $(SUBDIRS)
+clean: $(SUBDIRS)
+	rm -f $(wildcard *.stl)
+
+distclean: clean
+	rm -f $(wildcard *.json) Makefile
 
 %.json: %.jsonnet
 	jsonnet -o $@ $<
