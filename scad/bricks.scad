@@ -14,6 +14,7 @@ grid = true;
 
 // Nominal size of the brick in units
 size = [ 2, 1, 4 ]; // 0.25
+rot = [0,0,0]; // [0, 90, 180, 270]
 
 // Name of this brick
 name = "";

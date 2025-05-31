@@ -19,4 +19,5 @@ $(SUBDIRS):
 	jsonnet -o $@ $<
 
 %.stl: %.json
-	openscad --backend Manifold -p $< -P $(basename $(notdir $@)) -o $@ $(SCAD_DIR)/bricks.scad
+	@echo Making $@
+	@openscad --backend Manifold -p $< -P $(basename $(notdir $@)) --export-format binstl -o $@ $(SCAD_DIR)/bricks.scad 2> /dev/null

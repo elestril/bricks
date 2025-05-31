@@ -8,7 +8,6 @@ import re
 import shlex
 import stl
 
-
 import sys
 import pathlib
 
@@ -22,9 +21,7 @@ flags.DEFINE_string('remix_input', None, 'Path glob to input stl files')
 flags.DEFINE_spaceseplist('config', None, 'Which configs to use.')
 
 flags.DEFINE_string('confpath', str(pathlib.Path(__file__).parents[1].resolve().joinpath('configs')), 'Path to the yaml configs')
-
-# flags.DEFINE_spaceseplist('modules', ['all'], 'Which modules to create:\n' + json.dumps(MODULES, indent=4))
-# flags.register_validator('modules', lambda vals: all([val in MODULES for val in vals]), message=f'--module must be one or multiple of {MODULES.keys}')
+flags.DEFINE_string('scadpath', str(pathlib.Path(__file__).parents[1].resolve().joinpath('scad')), 'Path to the scad files')
 
 flags.DEFINE_string('output', '.', 'Output directory or "-" for dumping config to stdout.')
 flags.register_validator('output', lambda o: o == "-" or pathlib.Path(o).is_dir(), message='output must be "-" or an existing directory.')
@@ -44,6 +41,7 @@ CUSTOMIZER_TMPL = {
 }
 
 yaml = YAML()
+SCADPATH = None
 
 #### Config ####
 
@@ -78,7 +76,7 @@ class Brick:
 
   def __init__(self, **kwds):
     self.__dict__['_conf'] = { 
-      'size': list((1,1,1))
+      'size': list((None, None, None))
     }
     self._conf.update(kwds)
     
@@ -123,7 +121,7 @@ class Brick:
     } 
 
   def isValid(self):
-    return all(getattr(self, a) is not None for a in  ['type', 'subtype', 'label', 'x', 'y', 'z'])
+    return all((self.type, self.subtype, self.label, self.x, self.y, self.z))
         
     
 class Config(object): 
@@ -149,11 +147,8 @@ class Config(object):
         break
     else:
       return None
-
-    def applyUpdate(brick: Brick, update: Dict, formatVars: Dict):
-      if not update:
-        return
       
+    logging.debug('match: re:%s match:%r', match.re, match.groupdict())
     brick = Brick()
     brick.inputStl = file
     update = {}
@@ -171,10 +166,11 @@ class Config(object):
           update[k] = v
     brick.update(update)
       
-    logging.debug('%s: match2Brick: %r', file, str(brick))
     if brick.isValid():
+      logging.debug('%s: remix: %r', file, str(brick.config()))
       return brick
     else:
+      logging.debug('%s: invalid', file)
       return None
   
 def generateBricks() -> Dict: 
@@ -233,7 +229,7 @@ def writeJsonConfigs(bricks):
 
       conf = brick.config()
       conf['stl'] = brick.stl.name
-      conf['inputStl'] = str(brick.inputStl.resolve())
+      conf['inputStl'] = str(brick.inputStl.resolve().relative_to(SCADPATH, walk_up=True))
 
       jf = brick.stl.parent.joinpath(brick.stl.stem + '.json')
 
@@ -270,9 +266,9 @@ def writeJsonConfigs(bricks):
         out.write(MAKEFILE_TMPL.format(includedMakefile=inclMake))
 
 def main(argv): 
+  global SCADPATH
 
-  if FLAGS['verbosity'].using_default_value:
-    logging.set_verbosity(logging.WARNING)
+  SCADPATH = pathlib.Path(FLAGS.scadpath).resolve()
 
   output = pathlib.Path(FLAGS.output)
   log = Log()

@@ -76,13 +76,20 @@ module brick(size, subtype, label, studs = true, sockets = true, inputStl = "", 
         // ***  This is a remix  ***
         if (inputStl != "") { 
           if (subtype == "Wall") { 
-            socket_mirror([size.x * U, size.y * U, mirrorZ]) translate(TR + inputStlOffset) import(inputStl, convexity = 50);
+            socket_mirror([size.x * U, size.y * U, mirrorZ]) 
+              translate(size * U / 2 + TR + inputStlOffset) 
+              rotate(rot) 
+              import(inputStl, center = true, convexity = 50);
             translate([ -0.5 * U, -4.2, 0 ]) cube([ size.x, size.y -1 , 0.5 ] * U + [0, 8.4, 0]);
           } else if (size.z < 0.5 ) { 
-            translate(TR + inputStlOffset) import(inputStl, convexity = 50);
+            translate(size * U / 2 + TR + inputStlOffset) 
+              rotate(rot) 
+              import(inputStl, center = true, convexity = 50);
             translate(TR) cube([size.x * U, size.y * U, 2.6]);
           } else {
-            translate(TR + inputStlOffset) import(inputStl, convexity = 50);
+            translate(size * U / 2 + TR + inputStlOffset) 
+              rotate(rot) 
+              import(inputStl, center = true, convexity = 50);
             translate(TR) cube([size.x * U , size.y * U , 5]);
           }
         }

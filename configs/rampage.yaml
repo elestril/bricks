@@ -3,7 +3,10 @@ fileinfo:
   name: rampage
 
 regex:
-  - '(?P<code>\w+)(?:-(?P<kind>[A-Z]\w+))?(?:-(?P<set>[A-Z]\w+))?.*.stl'
+  # A-TRP-BrickWall-v4.0.stl
+  - '(?P<name>(?:(?P<kind>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-TRP)?-(?P<set>[A-Z]\w+))-v\d\.\d.stl' 
+  # A-Wall-Schist-v2.0.stl
+  - '(?P<code>[A-Z]+)-(?P<kind>[A-Z]\w+)-(?P<set>[A-Z]\w+)-v\d\.\d.stl'
 
 config:
   '*': 
@@ -11,17 +14,25 @@ config:
     license: commercial 
   code: 
     A:  {x: 4, y: 1} 
-    AS: {x: 4, y: 1}
+    BA: {x: 3, y: 1}
+    C:  {x: 5, y: 1}
+    D:  {x: 6, y: 1}
     E:  {x: 4, y: 4}
+    IA: {x: 2, y: 1}
     L:  {x: 1, y: 1}
   kind:
     Window: {type: Brick, subtype: Wall, z: 4,    label: '{kind}', mirrorZ: 7.2}
     Wall:   {type: Brick, subtype: Wall, z: 4,    label: '{kind}', mirrorZ: 7.2}
     Column: {type: Brick, subtype: Wall, z: 4,    label: '{kind}{code}'}
     Floor : {type: Brick, subtype: Tile, z: 0.25, label: 'Tile', 'studs': False, 'inputStlOffset': [0,0,-4.2]}
+    _: {type: Brick, subtype: Wall, z: 4,    label: 'Wall', mirrorZ: 7.2}
   set:
     Schlist: {set: Schist}
     '_': {set: '{set}'}
+
+  name:
+    'C-TRP-BrickWall': {rot: [0,0,180]}
+    'D-TRP-BrickWall': {rot: [0,0,180]}
 
 
 
