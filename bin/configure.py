@@ -64,7 +64,10 @@ class InvalidBrick(ValueError):
 
 class FormatDict(collections.OrderedDict): 
   def __getattr__(self, attr):
-    return self.__getitem__(attr)
+    if attr in self:
+      return self.__getitem__(attr)
+    else: 
+      return ''
 
 class Brick:
   # These need to be set for the brick to be valid.
@@ -150,17 +153,18 @@ class Config(object):
 
 
     mesh = stl.Mesh.from_file(file)
-    brick.update({
-      'inputStlMin': mesh.min_.tolist(), 
-      'inputStlMax': mesh.max_.tolist()}) 
-    size  = [round(c) / 4 for c in ((mesh.max_ - mesh.min_) * 4.0 / U ).tolist()]
- 
-    format_vars = {
-        'path': FormatDict({i: f for (i,f) in enumerate(file.parts[-1:-4:-1])}),
-        'match': FormatDict(match.groupdict(''))
+    
+    meshinfo = { 
+      'inputStlMin': mesh.min_.tolist(),
+      'inputStlMax': mesh.max_.tolist(), 
+      'size': [round(c) / 4 for c in ((mesh.max_ - mesh.min_) * 4.0 / U ).tolist()],
     }
+    vars = {} 
+    vars.update(((f'{k}',v) for (k,v) in meshinfo.items()))
+    vars.update(((f'{k}',v) for (k,v) in match.groupdict('').items()))
+    vars.update(((f'path{i}',v) for (i,v) in enumerate(file.parts[:-4:-1])))
 
-    bupdate = collections.OrderedDict()
+    bupdate = collections.OrderedDict(meshinfo)
 
     for (group) in self.config:
       subconf = self.config[group]
@@ -169,7 +173,8 @@ class Config(object):
         continue
 
       matchgroups = group.split('/')
-      subkey = '/'.join([match.groupdict('')[g] for g in matchgroups])
+      # subkey = '/'.join([match.groupdict('')[g] for g in matchgroups])
+      subkey = '/'.join([vars[g] for g in matchgroups])
 
       scval = subconf.get('*', {})
       if scval == False:
@@ -181,11 +186,13 @@ class Config(object):
         raise InvalidBrick(f'{file}: Config for {group}:{subkey} set to "False"') 
       bupdate.update(scval)
 
-    format_vars['config'] = FormatDict(bupdate)
-    logging.debug('format_vars:%s', [f'{vname}.{a}:{val}' for (vname,v) in format_vars.items() for (a,val) in v.items()])
+      logging.debug(f'group:{group} subkey:{subkey}')
+
+    vars['config'] = FormatDict(bupdate)
+    logging.debug('Available variables for config expansion: %s', ', '.join([f'{var}="{val}"' for (var,val) in vars.items()]))
     for (k,v) in bupdate.items():
       if type(v) is str:
-        bupdate[k] = v.format(**format_vars)
+        bupdate[k] = v.format(**vars)
 
     brick.update(bupdate)
     brick.validate()
