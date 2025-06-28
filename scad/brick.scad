@@ -3,7 +3,7 @@ include <params.scad>;
 include <stud.scad>;
 include <texture.scad>;
 
-// Brick, with the first grid position centered on 0,0o
+// Brick, with the first grid position centered on 0,0
 TR = [-0.5,-0.5,0] * U;
 
 module brick_tr() { translate(TR) children(); }
@@ -27,17 +27,14 @@ module maybe_apply_sockets(size, sockets = true, fit) {
     children();
 }
 
-module brick_cut(size, subtype = "Generic") { 
+module brick_cut(size, genus = "Generic") { 
   intersection() { 
-  if (subtype == "Wall") {
+  if (genus == "Wall") {
     union() {
     // Allow singnificant overhangs in the Y direction for walls.
       translate(TR)  cube([ size.x, size.y, 0.5 ] * U);
       translate([ -0.5, -6, 0.5 ] * U) cube([ size.x, 12, size.z - 0.5 ] * U);
     }
-  } else if (subtype == "Tile") { 
-    // Allow slightly higher profile on tiles
-    translate(TR) cuboid(size * U + [0,0,2], anchor = FRONT+LEFT+BOTTOM, chamfer=0.8, edges=BOTTOM);
   } else { 
     // Cut to nominal size
      translate(TR) cuboid(size * U, anchor = FRONT+LEFT+BOTTOM, chamfer=0.8, edges=BOTTOM);
@@ -45,7 +42,6 @@ module brick_cut(size, subtype = "Generic") {
   children();
   }
 }
-
 
 module brick_cube(size) { 
   cube(size * U);
@@ -69,13 +65,13 @@ module socket_mirror(size) {
   }
 }
 
-module brick(size, subtype, label, studs = true, sockets = true, inputStl = "", inputStlMin = [0,0,0], inputStlMax = [0,0,0], mirrorZ = 0, floorTx = "") {
+module brick(size, genus, studs = true, sockets = true, inputStl = "", inputStlMin = [0,0,0], inputStlMax = [0,0,0], mirrorZ = 0, bottomFill = 0, floorTx = "") {
   union() {
-    maybe_apply_sockets(size, sockets, fit = size.z > 0.25 ? "snug" :"loose") brick_cut(size, subtype)  
+    maybe_apply_sockets(size, sockets, fit = size.z > 0.25 ? "snug" :"loose") brick_cut(size, genus)  
       union() { 
         // ***  This is a remix  ***
         if (inputStl != "") { 
-          if (subtype == "Wall") { 
+          if (genus == "Wall") { 
             socket_mirror([size.x * U, size.y * U, mirrorZ]) 
               translate([size.x * U , size.y * U, inputStlMax.z - inputStlMin.z ] / 2 + TR + inputStlMin)
               rotate(rot) 
@@ -87,10 +83,9 @@ module brick(size, subtype, label, studs = true, sockets = true, inputStl = "", 
               import(inputStl, center = true, convexity = 50);
             translate(TR) cube([size.x * U, size.y * U, 2.6]);
           } else {
-              translate(size * U / 2 + TR + inputStlMin + (inputStlMax - size * U) * [0,0,0.5]) 
-              rotate(rot) 
-              import(inputStl, center = true, convexity = 50);
-            translate(TR) cube([size.x * U , size.y * U , 5]);
+            translate(TR - inputStlMin)
+            import(inputStl, convexity = 50);
+            translate(TR) cube([size.x * U , size.y * U , bottomFill]);
           }
         }
         // *** This is a textured floor tile ***

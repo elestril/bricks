@@ -11,7 +11,7 @@ stl: $(patsubst %.json,%.stl,$(wildcard *.json))
 
 .PHONY: $(TOPTARGETS) $(SUBDIRS)
 $(SUBDIRS):
-	$(MAKE) -C $@ $(MAKECMDGOALS)
+	$(MAKE) -C '$@' $(MAKECMDGOALS)
 
 clean: $(SUBDIRS)
 	rm -f $(wildcard *.stl)
