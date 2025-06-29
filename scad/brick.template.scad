@@ -1,4 +1,5 @@
 include <brick.scad>;
+include <wall.scad>;
 
 family = "{family}";
 subfamily = "{subfamily}";
@@ -35,8 +36,9 @@ bottomFill = {bottomFill}; // [0:0.1:10]
 texture = "{texture}";
 
 module __Customizer_Limit__ () {{}} // Hide following assignments from Customizer.
-
-if (family == "Square" ) {{ 
+if (subfamily == "Wall") {{
+  wall(size, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill);
+}} else if (family == "Square" ) {{ 
   brick(size, subfamily, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill, texture);
 }} else if (family == "Hex-R") {{ 
   hex_r(size, subfamily, studs, sockets);

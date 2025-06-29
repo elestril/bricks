@@ -27,9 +27,9 @@ module maybe_apply_sockets(size, sockets = true, fit) {
     children();
 }
 
-module brick_cut(size, genus = "Generic") { 
+module brick_cut(size, subfamily = "Generic") { 
   intersection() { 
-  if (genus == "Wall") {
+  if (subfamily == "Wall") {
     union() {
     // Allow singnificant overhangs in the Y direction for walls.
       translate(TR)  cube([ size.x, size.y, 0.5 ] * U);
@@ -65,13 +65,21 @@ module socket_mirror(size) {
   }
 }
 
-module brick(size, genus, studs = true, sockets = true, inputStl = "", inputStlMin = [0,0,0], inputStlMax = [0,0,0], mirrorZ = 0, bottomFill = 0, floorTx = "") {
+module brick(
+    size, 
+    subfamily, 
+    studs = true, 
+    sockets = true, 
+    inputStl = "", inputStlMin = [0,0,0], inputStlMax = [0,0,0], 
+    mirrorZ = 0, 
+    bottomFill = 0, 
+    floorTx = "") {
   union() {
-    maybe_apply_sockets(size, sockets, fit = size.z > 0.25 ? "snug" :"loose") brick_cut(size, genus)  
+    maybe_apply_sockets(size, sockets, fit = size.z > 0.25 ? "snug" :"loose") brick_cut(size, subfamily)  
       union() { 
         // ***  This is a remix  ***
         if (inputStl != "") { 
-          if (genus == "Wall") { 
+          if (subfamily == "Wall") { 
             socket_mirror([size.x * U, size.y * U, mirrorZ]) 
               translate([size.x * U , size.y * U, inputStlMax.z - inputStlMin.z ] / 2 + TR + inputStlMin)
               rotate(rot) 

@@ -1,0 +1,24 @@
+remix:
+  OpenLOCK: 
+    regex:
+      # A-TRP-BrickWall-Low-v4.0.stl
+      - '((?P<prefix>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-(TRP|RPG))?-(?P<set>[A-Z][a-z]+)(-?(?P<subset>[A-Z][a-z]+))*-v\d.\d.stl' 
+  
+    config:
+      '*': 
+        homepage: http://printablescenery.com
+        license: commercial 
+      'prefix':
+        Wall:   &Wall {family: Square, subfamily: Wall, studs: True, mirrorZ: 7.2}
+        Window: *Wall
+        Column: &Column {family: Square, subfamily: Wall, studs: True}
+        Floor : &Floor {family: Square, studs: False, inputStlOffset: [0,0,-4.2]}
+        _: {family: Square, subfamily: Tile, studs: False} 
+      'set': 
+        Wall: *Wall
+        Window: *Wall
+        Column: *Column
+        Floor: *Floor
+      'subset':
+        _: {order: '{subset}'}
+  

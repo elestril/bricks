@@ -73,22 +73,21 @@ class Remix:
     vars.update(((f'{k}', ''.join(v)) for (k,v) in match.capturesdict().items()))
     vars.update(((f'path{i}',v) for (i,v) in enumerate(infile.parts[:-5:-1])))
 
-    bConf = Config(
-      stl = infile.name,
-      name = infile.stem,
-      input = infile.resolve(),
-      inputStlMin = copy.copy(vars['meshMin']),
-      inputStlMax = copy.copy(vars['meshMax']),
-      path = pathlib.Path(
-        str(infile.resolve().relative_to(self._input, walk_up=True).parent).replace(' ', '')),
-      size = copy.copy(vars['meshDimension'])
-    )
+    brickConfig = {
+      'name': infile.stem,
+      'set': self.name,
+      'input': infile.resolve(),
+      'inputMin': copy.copy(vars['meshMin']),
+      'inputMax': copy.copy(vars['meshMax']),
+      'path': pathlib.Path(self.name, infile.parent.name.replace(' ', '')),
+      'size': copy.copy(vars['meshDimension'])
+    }
     
     
     for (group) in self.config:
       subconf = self.config[group]
       if group == '*': 
-        bConf.update(subconf)
+        brickConfig.update(subconf)
         continue
 
       matchgroups = group.split('/')
@@ -98,22 +97,21 @@ class Remix:
       scval = subconf.get('*', {})
       if scval == False:
         raise InvalidBrick(f'{infile}: Config for {group}:{subkey} set to "False"') 
-      bConf.update(scval)
+      brickConfig.update(scval)
         
       scval = subconf.get(subkey, subconf.get('_', {}))
       if scval == False:
         raise InvalidBrick(f'{infile}: Config for {group}:{subkey} set to "False"') 
-      bConf.update(scval)
+      brickConfig.update(scval)
 
-    vars['config'] = Config(bConf)
+    vars['config'] = brickConfig
     logging.debug('Available variables for config expansion: %s', ', '.join([f'{var}="{val}"' for (var,val) in vars.items()]))
-    for (k,v) in bConf.items():
+    for (k,v) in brickConfig.items():
       if type(v) is str:
-        bConf[k] = v.format(**vars)
+        brickConfig[k] = v.format(**vars)
 
-    logging.debug('Brick config: %s', ', '.join([f'{var}="{val}"' for (var,val) in bConf.items()]))
-    brick = Brick(bConf)
-    brick.validate()
+    logging.debug('Brick config: %r', brickConfig)
+    brick = Brick(**brickConfig)
     logging.debug('Success: %s', brick)
     return brick
 

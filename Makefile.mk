@@ -17,5 +17,5 @@ distclean: clean
 	rm -rf *
 
 %.stl: %.scad $(SCAD_FILES)
-	@echo Rendering $@
+	@echo Generating $@
 	@openscad --backend Manifold --export-format binstl -o $@ $< 2>/dev/null

@@ -105,17 +105,16 @@ class Bricks:
 
       logging.debug('%s/%s: %r', brick.path, brick.name, brick.config)
 
-      if brick.config == jsonConfig.get(brick.name, {}):
+      scadFile = output.joinpath(brick.path, brick.name + '.scad').resolve()
+
+      if brick.config == jsonConfig.get(brick.name, {}) and scadFile.exists():
         STATS[brick.set]['unchanged'] += 1
         STATS['total']['unchanged'] += 1
-
         logging.info(f'{brick.name}: Unchanged')
         continue
 
       jsonConfig[brick.name] = brick.config
-
       scadConfig = scadTemplate.format(**brick.config)
-      scadFile = output.joinpath(brick.path, brick.name + '.scad').resolve()
 
       if not scadFile.parent.exists():
         scadFile.parent.mkdir(parents=True)    

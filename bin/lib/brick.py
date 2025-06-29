@@ -15,7 +15,7 @@ class Brick(UserDict):
       'subfamily': 'Tile',
       'set': 'Blank',
       'studs': False,
-      'sockets': False,
+      'sockets': True,
       'grid': False,
       'size': None,
       'rot': (0, 0, 0),
@@ -34,11 +34,11 @@ class Brick(UserDict):
       for (k,v) in self._DEFAULTS.items():
         match k:
           case 'size':
-            v = kwds.get('size', [kwds['x'], kwds['y'], kwds['z']])
+            v = kwds.get(k, list((kwds.get('x'), kwds.get('y'), kwds.get('z'))))
           case 'name':
-            v = kwds.get('name', self.getname())
+            v = kwds.get(k, self.name)
           case 'path':
-            v = kwds.get('path', pathlib.Path(self.set, self.subfamily))
+            v = kwds.get(k, pathlib.Path(self.set, self.subfamily))
           case _: 
             v = kwds.get(k, v)
         if type(v) is tuple: v = list(v)
@@ -70,7 +70,10 @@ class Brick(UserDict):
   def z(self) -> float:
     return self.size[2]
 
-  def getname(self) -> str:
+  @property
+  def name(self) -> str:
+    if self.data.get('name', None):
+      return self.data['name']
     if self.family in ('Hex-R', 'Hex-S'):
       name = [self.set, self.family, self.subfamily, self.x]
     else:
