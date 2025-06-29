@@ -32,11 +32,11 @@ module stud_poly() {
   ]);
 }
 
-module socket(fit="snug") {
+module socket(fit="snug", symmetry=4) {
   union() {
     rotate_extrude(convexity = 4) socket_poly(fit);
-    for (a = [ 0, 90 ])
-      rotate([ 0, 0, a ]) cube([ 7.2, 0.4, 4.4 ], center = true);
+    aa = (symmetry == 2) ? [0] : (symmetry == 3) ? [0, 60, 120] : [0, 90];
+    for (a = aa) rotate([0, 0, a ]) cube([ 7.2, 0.4, 4.4 ], center = true);
   }
 }
 

@@ -39,7 +39,7 @@ texture = "{texture}";
 module __Customizer_Limit__ () {{}} // Hide following assignments from Customizer.
 if (subfamily == "Wall") {{
   wall(size, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill);
-}} else if (family == "Square" ) {{ 
+}} else if (family == "Square") {{ 
   brick(size, subfamily, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill, texture);
 }} else if (family == "HexLinear") {{
   hex_linear(size, studs, sockets, grid);
