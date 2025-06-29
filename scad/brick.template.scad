@@ -1,5 +1,6 @@
 include <brick.scad>;
 include <wall.scad>;
+include <hex.scad>;
 
 family = "{family}";
 subfamily = "{subfamily}";
@@ -41,7 +42,7 @@ if (subfamily == "Wall") {{
 }} else if (family == "Square" ) {{ 
   brick(size, subfamily, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill, texture);
 }} else if (family == "Hex-R") {{ 
-  hex_r(size, subfamily, studs, sockets);
+  hex_r(size, studs, sockets, grid);
 }} else if (family == "Hex-S") {{ 
-  hex_s(size, subfamily, studs, sockets);
+  hex_s(size, studs, sockets, grid);
 }}

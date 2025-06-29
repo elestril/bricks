@@ -20,7 +20,7 @@ from lib.stats import STATS
 flags.DEFINE_string('output', '.', 'Outpot directory.')
 flags.register_validator('output', lambda o: pathlib.Path(o).is_dir(), message='output must be an existing directory.')
 
-flags.DEFINE_bool('scad_output', True, 'Write configs as individual scad files, one per stl file.')
+flags.DEFINE_bool('force', False, 'Overwrite unchanged files.')
 FLAGS = flags.FLAGS
 
 yaml = YAML()
@@ -107,7 +107,7 @@ class Bricks:
 
       scadFile = output.joinpath(brick.path, brick.name + '.scad').resolve()
 
-      if brick.config == jsonConfig.get(brick.name, {}) and scadFile.exists():
+      if not FLAGS.force and brick.config == jsonConfig.get(brick.name, {}) and scadFile.exists():
         STATS[brick.set]['unchanged'] += 1
         STATS['total']['unchanged'] += 1
         logging.info(f'{brick.name}: Unchanged')
@@ -118,8 +118,6 @@ class Bricks:
 
       if not scadFile.parent.exists():
         scadFile.parent.mkdir(parents=True)    
-        with open(scadFile.parent.joinpath("Makefile"), "w") as out:
-          out.write(MAKEFILE_TMPL.format(incl=BASEDIR.joinpath('Makefile.mk').resolve().relative_to(scadFile, walk_up=True).name))
 
       if scadFile.exists():
         neworupdate = 'updated'

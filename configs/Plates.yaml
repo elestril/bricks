@@ -1,0 +1,20 @@
+generate:
+  SquarePlates:
+    generate:
+      x: [1,2,3,4,5,6,7,8]
+      y: [1,2,3,4,5,6,7,8]
+    condition: '{x} >= {y}'
+    config: &Plate
+      family: Square
+      subfamily: Plate
+      set: Plates
+      path: Plates/Square
+      studs: True
+      z: 0.25
+  HexPlates: 
+    generate:
+      x: [1,2,3,4]
+      family: ["Hex-R", "Hex-S"]
+    config: 
+      <<: *Plate
+      path: Plates/Hex

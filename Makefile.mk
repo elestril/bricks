@@ -18,4 +18,4 @@ distclean: clean
 
 %.stl: %.scad $(SCAD_FILES)
 	@echo Generating $@
-	@openscad --backend Manifold --export-format binstl -o $@ $< 2>/dev/null
+	-openscad --backend Manifold --export-format binstl -o $@ $<

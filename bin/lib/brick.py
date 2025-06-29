@@ -34,11 +34,11 @@ class Brick(UserDict):
       for (k,v) in self._DEFAULTS.items():
         match k:
           case 'size':
-            v = kwds.get(k, list((kwds.get('x'), kwds.get('y'), kwds.get('z'))))
+            v = kwds.get(k, list((kwds.get('x',0), kwds.get('y',0), kwds.get('z',0))))
           case 'name':
             v = kwds.get(k, self.name)
           case 'path':
-            v = kwds.get(k, pathlib.Path(self.set, self.subfamily))
+            v = pathlib.Path(kwds.get(k, self.path))
           case _: 
             v = kwds.get(k, v)
         if type(v) is tuple: v = list(v)
@@ -79,6 +79,12 @@ class Brick(UserDict):
     else:
       name = [self.set, self.family, self.subfamily, f'{self.x:g}x{self.y:g}']
     return '-'.join([str(n) for n in name if n is not None])
+
+  @property
+  def path(self) -> pathlib.Path:
+    if self.data.get('path', None):
+      return self.data['path']
+    return pathlib.Path(self.set)
 
   def __str__(self) -> str:
     return f'{self.name}'

@@ -2,7 +2,7 @@ remix:
   OpenLOCK: 
     regex:
       # A-TRP-BrickWall-Low-v4.0.stl
-      - '((?P<prefix>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-(TRP|RPG))?-(?P<set>[A-Z][a-z]+)(-?(?P<subset>[A-Z][a-z]+))*-v\d.\d.stl' 
+      - '((?P<prefix>[A-Z][a-z]+)-)?(?P<code>[A-Z]+)(-(TRP|RPG))?-(?P<family>[A-Z][a-z]+)(-?(?P<subset>[A-Z][a-z]+))*-v\d.\d.stl' 
   
     config:
       '*': 
@@ -14,7 +14,7 @@ remix:
         Column: &Column {family: Square, subfamily: Wall, studs: True}
         Floor : &Floor {family: Square, studs: False, inputStlOffset: [0,0,-4.2]}
         _: {family: Square, subfamily: Tile, studs: False} 
-      'set': 
+      'family': 
         Wall: *Wall
         Window: *Wall
         Column: *Column

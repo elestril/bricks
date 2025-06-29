@@ -1,0 +1,31 @@
+generate:
+  Tiles:
+    generate:
+      x: [1,2,3,4,5,6,7,8]
+      y: [1,2,3,4,5,6,7,8]
+    condition: '{x} >= {y}'
+    config: &Reference
+      family: Square
+      subfamily: Tile
+      set: Reference
+      path: Reference/Tiles
+      studs: False
+      z: 0.25
+  Walls:
+    generate:
+      x: [1,2,3,4,5,6,7,8]
+    config: 
+      <<: *Reference
+      subfamily: Wall
+      path: Reference/Walls
+      studs: True
+      y: 1
+      z: 4
+  HexTiles: 
+    generate:
+      x: [1,2,3,4]
+      family: ["Hex-R", "Hex-S"]
+    config:
+      <<: *Reference
+      path: Reference/HexTiles
+      grid: True
