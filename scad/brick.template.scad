@@ -41,6 +41,8 @@ if (subfamily == "Wall") {{
   wall(size, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill);
 }} else if (family == "Square" ) {{ 
   brick(size, subfamily, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill, texture);
+}} else if (family == "HexLinear") {{
+  hex_linear(size, studs, sockets, grid);
 }} else if (family == "Hex-R") {{ 
   hex_r(size, studs, sockets, grid);
 }} else if (family == "Hex-S") {{ 

@@ -21,7 +21,17 @@ generate:
       studs: True
       y: 1
       z: 4
-  HexTiles: 
+  HexLinearTiles: 
+    generate: 
+       x: [1,2,3,4]
+       y: [1,2,3,4]
+    config: 
+      <<: *Reference
+      family: HexLinear
+      path: Reference/HexTiles
+      grid: True
+
+  HexRSTiles: 
     generate:
       x: [1,2,3,4]
       family: ["Hex-R", "Hex-S"]

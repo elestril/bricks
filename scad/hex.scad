@@ -19,6 +19,15 @@ module hex_pattern(mind, maxd = -1, unit = U) {
   }
 }
 
+module hex_rect_pattern(x, y, unit = U) {
+  for (q = [0:1:x-1]) {
+    for (r = [0:1:y-1]) {
+      translate(unit * cube_coords * [ r, q - floor(r / 2)]) children();
+    }
+  }
+}
+
+
 module hex_sockets(d = 1, sockets = true, edge_blank = false, fit = "snug") {
   if (sockets) {
     difference() {
@@ -47,7 +56,7 @@ module hex_grid(size, grid = true) {
   }
 }
 
-module hex_base(z = 0.25, stud = true, socket = true) {
+module hex_base(z = 0.25) {
   linear_extrude(height = z * U) circle(r = U, $fn = 6);
 }
 
@@ -59,7 +68,7 @@ module hex_r(size, studs, sockets, grid = true) {
     )
     union() {
       hex_grid(size, grid) hex_pattern(0, size.x, U)
-          hex_base(size.z, stud = false, socket = false);
+          hex_base(size.z);
       if (studs) {
         hex_pattern(0, size.x * 2 + 1, unit = 0.5 * U) translate([ 0, 0, size.z ] * U) stud();
       }
@@ -78,4 +87,8 @@ module hex_s(size, studs, sockets, grid = true) {
     }
     rotate([0,0,30]) linear_extrude(height = (size.z + 0.5) * U) circle(r = sqrt(3) * size.x * U, $fn = 6);
   }
+}
+
+module hex_linear(size, studs, sockets, grid = true)  { 
+      hex_rect_pattern(size.x, size.y, U) # hex_base(size.z);
 }
