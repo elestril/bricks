@@ -1,0 +1,8 @@
+fileinfo:
+  type: TEXTURES
+
+textures:
+  rustic_wood:
+    heightmap: 'rustic_wood.png'
+    size: {x: 1, y: 1, unit: in}
+

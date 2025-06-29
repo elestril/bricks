@@ -42,7 +42,7 @@ def main(argv):
   ymls = pathlib.Path('.').glob(FLAGS.configs)
 
   config.configure(ymls)
-  config.writeJsonConfigs()
+  config.writeConfigs()
 
   with io.StringIO() as ybuf:
     yaml.dump({str(k): dict(v) for (k,v) in STATS.items()}, ybuf)

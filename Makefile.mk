@@ -1,27 +1,21 @@
-SCAD_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/scad)
-SCAD_FILES := $(wildcard $(SCAD_DIR)/*.scad)
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+export OPENSCADPATH := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/scad)
+SCAD_FILES := $(wildcard $(OPENSCADPATH)/*.scad)
+
+STL := $(patsubst %.scad,%.stl,$(call rwildcard,*,*.scad))
 
 TOPTARGETS := all stl clean distclean
 
-SUBDIRS := $(patsubst %/Makefile,%,$(wildcard */Makefile))
+all: $(STL)
 
-all: stl $(SUBDIRS)
-
-stl: $(patsubst %.json,%.stl,$(wildcard *.json))
-
-.PHONY: $(TOPTARGETS) $(SUBDIRS)
-$(SUBDIRS):
-	$(MAKE) -C '$@' $(MAKECMDGOALS)
-
-clean: $(SUBDIRS)
-	rm -f $(wildcard *.stl)
+.PHONY: clean distclean
+clean: 
+	rm -f $(STL)
 
 distclean: clean
-	rm -f $(wildcard *.json) Makefile
+	rm -rf *
 
-%.json: %.jsonnet
-	jsonnet -o $@ $<
-
-%.stl: %.json
-	@echo Making $@
-	openscad --backend Manifold -p $< -P $(basename $(notdir $@)) --export-format binstl -o $@ $(SCAD_DIR)/bricks.scad
+%.stl: %.scad $(SCAD_FILES)
+	@echo Rendering $@
+	@openscad --backend Manifold --export-format binstl -o $@ $< 2>/dev/null

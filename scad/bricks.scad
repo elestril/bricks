@@ -1,12 +1,10 @@
-include <params.scad>;
 include <brick.scad>;
-include <hex.scad>;
 
 // Parameters
 
 // label of brick to generate
 family = "Square";
-genus = "Wall";
+subfamily = "Wall";
 studs = true;
 sockets = true;
 grid = true;
@@ -22,10 +20,10 @@ name = "";
 input = "";
 
 // Offset of the input stl to normalize with the brick grid
-inputStlMin = [0,0,0];
+inputMin = [0,0,0];
 
 // Offset of the input stl to normalize with the brick grid
-inputStlMax = size * U;
+inputMax = size * U;
 
 // Mirror z millimeters of the foot to patch any slots
 mirrorZ = 7.0; // [0:0.1:10]
@@ -39,9 +37,9 @@ floorTx = "";
 module __Customizer_Limit__ () {}  // Hide following assignments from Customizer.
 
 if (family == "Square" ) { 
-  brick(size, genus, studs, sockets, input, inputStlMin, inputStlMax, mirrorZ, bottomFill, floorTx);
+  brick(size, subfamily, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill, floorTx);
 } else if (family == "Hex-R") { 
-  hex_r(size, genus, studs, sockets);
+  hex_r(size, subfamily, studs, sockets);
 } else if (family == "Hex-S") { 
-  hex_s(size, genus, studs, sockets);
+  hex_s(size, subfamily, studs, sockets);
 }
