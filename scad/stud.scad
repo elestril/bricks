@@ -22,8 +22,8 @@ module stud() { rotate_extrude(convexity = 2) stud_poly(); }
 
 module stud_poly() {
   polygon([
-    [ 0.0, -0.4 ],  //
-    [ 2.4, -0.4 ],  // A
+    [ 0.0, -0.8 ],  //
+    [ 2.4, -0.8 ],  // A
     [ 2.4, 1.0 ],   // B
     [ 2.6, 1.2 ],   // C
     [ 2.6, 1.6 ],   // D

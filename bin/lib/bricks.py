@@ -87,13 +87,10 @@ class Bricks:
       scadTemplate = tmpl.read()
 
     output = pathlib.Path(FLAGS.output)
-    if not output.is_dir():
-      raise FileNotFoundError('%s must be a directory.')
 
     if not output.joinpath('Makefile').exists():
       with open(output.joinpath('Makefile'), 'w') as fd:
         fd.write(MAKEFILE_TMPL.format(incl=BASEDIR.joinpath('Makefile.mk').resolve().relative_to(output.resolve(), walk_up=True)))
-
 
     jsonConfigPath = pathlib.Path(output).joinpath('config.json')
     jsonConfig = {}
@@ -103,18 +100,18 @@ class Bricks:
 
     for brick in self.bricks():
 
-      logging.debug('%s/%s: %r', brick.path, brick.name, brick.config)
-
+      scadConfigItems = brick.scadConfigItems()
       scadFile = output.joinpath(brick.path, brick.name + '.scad').resolve()
-
-      if not FLAGS.force and brick.config == jsonConfig.get(brick.name, {}) and scadFile.exists():
+      
+      logging.debug('writing %s/%s: %r', brick.path, brick.name, scadConfigItems)
+      if not FLAGS.force and brick.scadConfigItems() == jsonConfig.get(brick.name, {}) and scadFile.exists():
         STATS[brick.set]['unchanged'] += 1
         STATS['total']['unchanged'] += 1
         logging.info(f'{brick.name}: Unchanged')
         continue
 
-      jsonConfig[brick.name] = brick.config
-      scadConfig = scadTemplate.format(**brick.config)
+      jsonConfig[brick.name] = scadConfigItems
+      scadConfig = scadTemplate.format_map(scadConfigItems)
 
       if not scadFile.parent.exists():
         scadFile.parent.mkdir(parents=True)    
@@ -126,6 +123,7 @@ class Bricks:
 
       with open(scadFile, 'w') as fd:
         fd.write(scadConfig)
+        logging.info(f'{brick.name}: {neworupdate}')
         STATS[brick.set][neworupdate] += 1
         STATS['total'][neworupdate] += 1
 

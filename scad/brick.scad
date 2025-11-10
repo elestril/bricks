@@ -3,108 +3,121 @@ include <params.scad>;
 include <stud.scad>;
 include <texture.scad>;
 
-// Brick, with the first grid position centered on 0,0
-TR = [-0.5,-0.5,0] * U;
+/**** Scale vectors ****/ 
+SQUARE = [ 
+  [1,0,0],
+  [0,1,0],
+  [0,0,1],
+] * U;
 
-module brick_tr() { translate(TR) children(); }
+// streched in x-direction, offset 0.5U from origin
+LONG = [ 
+  [sqrt(3),0,0],
+  [      0,1,0],
+  [      0,0,1],
+] * U;
 
-module brick_studs(size) {
-  for (sx = [0:size.x - 1])
-    for (sy = [0:size.y - 1]) translate([ sx, sy, size.z ] * U) stud();
-}
-
-module brick_sockets(size, fit) {
-  for (sx = [0:size.x - 1])
-    for (sy = [0:size.y - 1]) translate([ sx, sy, 0 ] * U) socket(fit);
-}
-
-module maybe_apply_sockets(size, sockets = true, fit) {
-  if (sockets) difference() {
-      children();
-      brick_sockets(size, fit);
+module xy_pattern(size, coords) { 
+  for (sx = [0:size.x-1]) {
+    for (sy = [0:size.y-1]) {
+      translate(coords * [sx + 0.5,sy + 0.5, size.z]) children(); 
     }
+  }
+}
+
+module xyz_cuts() { 
+  difference() {
+    children();
+    if (CUT_X > -20 ) { 
+      translate([CUT_X - 20, -10, 0] * U) cube(20 * U);
+    }
+    if (CUT_Y > -20 ) { 
+      translate([-10, CUT_Y - 20, 0] * U) cube(20 * U);
+    }
+    if (CUT_Z > -20 ) { 
+      translate([0,0, CUT_Z - 20] * U) cube(20 * U);
+    }
+  }
+}
+
+module xy_studs(size, coords, studs = STUDS) { 
+  if (studs) {
+    union() {
+      children();
+      xy_pattern(size, coords) stud(); 
+    } 
+  } else {
+    children();
+  } 
+}
+
+module xy_sockets(size, coords, fit = "snug", sockets = SOCKETS) {
+  if (sockets) difference() {
+    children();
+    xy_pattern([size.x, size.y, 0], coords) socket(fit);
+  }
   else
     children();
 }
 
-module brick_cut(size, subfamily = "Generic") { 
-  intersection() { 
-  if (subfamily == "Wall") {
-    union() {
-    // Allow singnificant overhangs in the Y direction for walls.
-      translate(TR)  cube([ size.x, size.y, 0.5 ] * U);
-      translate([ -0.5, -6, 0.5 ] * U) cube([ size.x, 12, size.z - 0.5 ] * U);
-    }
+module brick_cube(size, coords) { 
+  if (size.z < 0.26 && SOCKETS) { 
+    cuboid(coords * size, p1 = [0,0,0], chamfer=0.6, edges=[BOT]);
   } else { 
-    // Cut to nominal size
-     translate(TR) cuboid(size * U, anchor = FRONT+LEFT+BOTTOM, chamfer=0.8, edges=BOTTOM);
-  }
-  children();
+    cuboid(coords * size, p1 = [0,0,0]);
   }
 }
 
-module brick_cube(size) { 
-  cube(size * U);
-}
-
-module socket_mirror(size) {
+module socket_mirror(dim) {
   // Mirrors the front side of the tile to the back to cover the openlock slots.
-  if (size.z == 0) { 
+  if (dim.z == 0) { 
     children();
   } else { 
     union() {
       mirror([ 0, 1, 0 ]) intersection() {
-        translate([ -0.5, 0, 0 ] * U) cube(size);
+        translate([ -0.5, 0, 0 ] * U) cube(dim);
         children();
       }
       difference() {
         children();
-        translate([ -0.5, 0, 0 ] * U - [ 0, size.y, 0 ]) cube(size);
+        translate([ -0.5, 0, 0 ] * U - [ 0, dim.y, 0 ]) cube(dim);
       }
     }
   }
 }
 
-module brick(
-    size, 
-    subfamily, 
-    studs = true, 
-    sockets = true, 
-    inputStl = "", inputStlMin = [0,0,0], inputStlMax = [0,0,0], 
-    mirrorZ = 0, 
-    bottomFill = 0, 
-    floorTx = "") {
+module brick(coords=SQUARE, size = SIZE){ 
+    xyz_cuts() xy_sockets(size, coords) xy_studs(size, coords) brick_cube(size, coords);
+}
+/*
+module brick() {
   union() {
-    maybe_apply_sockets(size, sockets, fit = size.z > 0.25 ? "snug" :"loose") brick_cut(size, subfamily)  
+    brick_sockets(size, sockets, fit = size.z > 0.25 ? "snug" :"loose") 
       union() { 
         // ***  This is a remix  ***
-        if (inputStl != "") { 
-          if (subfamily == "Wall") { 
+        if (input != "") { 
+          if (mirrorZ > 0) { 
             socket_mirror([size.x * U, size.y * U, mirrorZ]) 
-              translate([size.x * U , size.y * U, inputStlMax.z - inputStlMin.z ] / 2 + TR + inputStlMin)
+              translate([size.x * U , size.y * U, inputMax.z - inputMin.z ] / 2 + TR + inputMin)
               rotate(rot) 
               import(inputStl, center = true, convexity = 50);
             translate([ -0.5 * U, -4.4, 0 ]) cube([ size.x, size.y -1 , 0.5 ] * U + [0, 8.8, 0]);
-          } else if (size.z < 0.5 ) { 
-              translate(size * U / 2 + TR + inputStlMin + (inputStlMax -size * U) * [0,0,0.5]) 
-              rotate(rot) 
-              import(inputStl, center = true, convexity = 50);
-            translate(TR) cube([size.x * U, size.y * U, 2.6]);
-          } else {
-            translate(TR - inputStlMin)
-            import(inputStl, convexity = 50);
+         } else {
+            translate(TR - inputMin)
+            import(input, convexity = 50);
             translate(TR) cube([size.x * U , size.y * U , bottomFill]);
           }
         }
         // *** This is a textured floor tile ***
-        else if (floorTx) {
-          brick_tr() cube(size * U - [ 0, 0, 0.9 ]);
+        else if (texture) {
+          cube(size * U - [ 0, 0, 0.9 ]);
           translate([ -0.5 * U, -0.5 * U, size.z * U - 0.9 ]) texture(floorTx);
         // ***  This is a blank
         } else {
-          brick_tr() brick_cube(size);
+          brick_cube(size);
         }
       } 
     if (studs) brick_studs(size);
   }
 }
+*/

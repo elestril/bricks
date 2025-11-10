@@ -1,50 +1,64 @@
-include <brick.scad>;
-include <wall.scad>;
-include <hex.scad>;
+// Geometric class of the brick
+FAMILY = "{family}"; // [Square,Long,SquareHex,Hex,HexR,HexS]
 
-family = "{family}";
-subfamily = "{subfamily}";
-set = "{set}";
-studs = {studs};
-sockets = {sockets};
-grid = {grid};
+// Enable studs
+STUDS = {studs};
+
+// Enable sockets
+SOCKETS = {sockets};
+
+// Deboss grid
+GRID = {grid};
 
 // Nominal size of the brick in units
-size = {size}; // 0.25
+SIZE = {size}; // 0.25
 
 // Rotation of the brick
-rot = {rot}; // [0, 90, 180, 270]
-
-// Name of this brick
-name = "{name}";
+ROT = {rot}; // [0, 90, 180, 270]
 
 // STL file to remix
-input = "{input}";
+INPUT = "{input}";
 
 // Offset of the input stl to normalize with the brick grid
-inputMin = {inputMin};
+INPUTMIN = {inputMin};
 
 // Offset of the input stl to normalize with the brick grid
-inputMax = {inputMax};
+INPUTMAX = {inputMax};
 
 // Mirror z millimeters of the foot to patch any slots
-mirrorZ = {mirrorZ}; // [0:0.1:10]
+MIRRORZ = {mirrorZ}; // [0:0.1:10]
 
 // Fill that much of the bottom
-bottomFill = {bottomFill}; // [0:0.1:10]
+BOTTOMFILL = {bottomFill}; // [0:0.1:10]
+
+
+// Cut along X axis
+CUT_X = {cutX}; // [-99.0:0.25:20.0]
+
+// Cut along Y axis
+CUT_Y = {cutY}; // [-99.0:0.25:20.0]
+
+// Cut along Z axis
+CUT_Z = {cutZ}; // [-99.0:0.25:20.0]
+
 
 // Texture for tiles
-texture = "{texture}";
+TEXTURE = "{texture}";
 
 module __Customizer_Limit__ () {{}} // Hide following assignments from Customizer.
-if (subfamily == "Wall") {{
-  wall(size, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill);
-}} else if (family == "Square") {{ 
-  brick(size, subfamily, studs, sockets, input, inputMin, inputMax, mirrorZ, bottomFill, texture);
-}} else if (family == "HexLinear") {{
-  hex_linear(size, studs, sockets, grid);
-}} else if (family == "Hex-R") {{ 
-  hex_r(size, studs, sockets, grid);
-}} else if (family == "Hex-S") {{ 
-  hex_s(size, studs, sockets, grid);
+
+include <params.scad>;
+include <brick.scad>;
+include <hex.scad>;
+
+if (FAMILY == "Square") {{
+  brick(SQUARE);
+}} else if (FAMILY == "Long") {{
+  brick(LONG);
+}} else if (FAMILY == "Hex") {{
+  hex_l();
+}} else if (FAMILY == "HexR") {{ 
+  hex_r();
+}} else if (FAMILY == "HexS") {{ 
+  hex_s();
 }}

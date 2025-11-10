@@ -5,37 +5,51 @@ generate:
       y: [1,2,3,4,5,6,7,8]
     condition: '{x} >= {y}'
     config: &Reference
-      family: Square
-      subfamily: Tile
-      set: Reference
-      path: Reference/Tiles
+      grid: true
+      type: Tile
+      set: Blank
       studs: False
-      z: 0.25
   Walls:
     generate:
       x: [1,2,3,4,5,6,7,8]
     config: 
       <<: *Reference
-      subfamily: Wall
+      type: Wall
       path: Reference/Walls
       studs: True
       y: 1
       z: 4
-  HexLinearTiles: 
+  HexGrids: 
     generate: 
        x: [1,2,3,4]
        y: [1,2,3,4]
     config: 
       <<: *Reference
-      family: HexLinear
-      path: Reference/HexTiles
+      family: Hex
       grid: True
+  HexHalfX:
+    generate: 
+       x: [1]
+       y: [1,2,3,4]
+    config: 
+      <<: *Reference
+      family: Hex
+      variant: HalfX
+      cutX: 0
+  HexHalfY:
+    generate: 
+       x: [1,2,3,4]
+       y: [1]
+    config: 
+      <<: *Reference
+      family: Hex
+      variant: HalfY
+      cutY: 0
 
   HexRSTiles: 
     generate:
       x: [1,2,3,4]
-      family: ["Hex-R", "Hex-S"]
+      family: ["HexR", "HexS"]
     config:
       <<: *Reference
-      path: Reference/HexTiles
       grid: True
