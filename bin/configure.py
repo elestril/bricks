@@ -58,10 +58,12 @@ def main(argv):
   # Write the generated OpenSCAD files
   config.writeConfigs()
 
-  # Output statistics to console
-  with io.StringIO() as ybuf:
-    yaml.dump({str(k): dict(v) for (k,v) in STATS.items()}, ybuf)
-    print(f'\n\n**** STATS ****\n\n{ybuf.getvalue()}')
+  # Output statistics to console (only if not in test mode)
+  # In tests, STATS output would pollute test results
+  if not any('unittest' in arg or 'pytest' in arg for arg in sys.argv):
+    with io.StringIO() as ybuf:
+      yaml.dump({str(k): dict(v) for (k,v) in STATS.items()}, ybuf)
+      logging.info(f'\n\n**** STATS ****\n\n{ybuf.getvalue()}')
 
   return
 

@@ -58,41 +58,40 @@ class Brick:
       variant: Optional variant name for specialized versions
       **kwds: Additional parameters (rot, input, texture, etc.)
     """
+    # Merge defaults with provided keyword arguments
+    self._kwds = {**self._DEFAULTS, **kwds}
+    self.family = family
+    self.type = type
+    self.set = set
+    self.variant = variant
+    self.size = size or [kwds.get('x', 0), kwds.get('y', 0), kwds.get('z', 0)]
 
-      # Merge defaults with provided keyword arguments
-      self._kwds = {**self._DEFAULTS, **kwds}
-      self.family = family
-      self.type = type
-      self.set = set
-      self.variant = variant
-      self.size = size or [kwds.get('x', 0), kwds.get('y', 0), kwds.get('z', 0)]
-
-      # Set type-specific defaults for studs, sockets, grid, and z-size
-      match type:
-        case 'Plate':
-          # Standard plate: studs on top, sockets on bottom, internal grid
-          self.studs = self._kwds.get('studs', True)
-          self.sockets = self._kwds.get('sockets', True)
-          self.grid = self._kwds.get('grid', True)
-          self.size[2] = self.size[2] or 0.25
-        case 'Tile':
-          # Tile: smooth top (no studs), sockets on bottom, internal grid
-          self.studs = self._kwds.get('studs', False)
-          self.sockets = self._kwds.get('sockets', True)
-          self.grid = self._kwds.get('grid', True)
-          self.size[2] = self.size[2] or 0.25
-        case 'Wall':
-          # Wall: studs and sockets, no internal grid, tall
-          self.studs = self._kwds.get('studs', True)
-          self.sockets = self._kwds.get('sockets', True)
-          self.grid = self._kwds.get('grid', False)
-          self.size[2] = self.size[2] or 4.0
-        case 'Riser':
-          # Riser: studs and sockets, internal grid, 1 unit tall
-          self.studs = self._kwds.get('studs', True)
-          self.sockets = self._kwds.get('sockets', True)
-          self.grid = self._kwds.get('grid', True)
-          self.size[2] = self.size[2] or 1.0
+    # Set type-specific defaults for studs, sockets, grid, and z-size
+    match type:
+      case 'Plate':
+        # Standard plate: studs on top, sockets on bottom, internal grid
+        self.studs = self._kwds.get('studs', True)
+        self.sockets = self._kwds.get('sockets', True)
+        self.grid = self._kwds.get('grid', True)
+        self.size[2] = self.size[2] or 0.25
+      case 'Tile':
+        # Tile: smooth top (no studs), sockets on bottom, internal grid
+        self.studs = self._kwds.get('studs', False)
+        self.sockets = self._kwds.get('sockets', True)
+        self.grid = self._kwds.get('grid', True)
+        self.size[2] = self.size[2] or 0.25
+      case 'Wall':
+        # Wall: studs and sockets, no internal grid, tall
+        self.studs = self._kwds.get('studs', True)
+        self.sockets = self._kwds.get('sockets', True)
+        self.grid = self._kwds.get('grid', False)
+        self.size[2] = self.size[2] or 4.0
+      case 'Riser':
+        # Riser: studs and sockets, internal grid, 1 unit tall
+        self.studs = self._kwds.get('studs', True)
+        self.sockets = self._kwds.get('sockets', True)
+        self.grid = self._kwds.get('grid', True)
+        self.size[2] = self.size[2] or 1.0
 
 
   def __getattr__(self, key):
