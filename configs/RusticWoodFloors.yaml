@@ -1,0 +1,56 @@
+generate:
+  Tiles:
+    generate:
+      x: [1,2,3,4,5,6,7,8]
+      y: [1,2,3,4,5,6,7,8]
+    condition: '{x} >= {y}'
+    config: &RusticWood
+      grid: true
+      type: Tile
+      set: RusticWood
+      studs: False
+      texture: rustic_wood.png
+  Walls:
+    generate:
+      x: [1,2,3,4,5,6,7,8]
+    config:
+      <<: *RusticWood
+      type: Wall
+      path: RusticWood/Walls
+      studs: True
+      y: 1
+      z: 4
+  HexGrids:
+    generate:
+       x: [1,2,3,4]
+       y: [1,2,3,4]
+    config:
+      <<: *RusticWood
+      family: Hex
+      grid: True
+  HexHalfX:
+    generate:
+       x: [1]
+       y: [1,2,3,4]
+    config:
+      <<: *RusticWood
+      family: Hex
+      variant: HalfX
+      cutX: 0
+  HexHalfY:
+    generate:
+       x: [1,2,3,4]
+       y: [1]
+    config:
+      <<: *RusticWood
+      family: Hex
+      variant: HalfY
+      cutY: 0
+
+  HexRSTiles:
+    generate:
+      x: [1,2,3,4]
+      family: ["HexR", "HexS"]
+    config:
+      <<: *RusticWood
+      grid: True
