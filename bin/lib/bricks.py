@@ -26,7 +26,7 @@ from lib.globals import BASEDIR, scadpath
 from lib.stats import STATS
 
 # Command-line flags
-flags.DEFINE_string('output', '.', 'Outpot directory.')
+flags.DEFINE_string('output', '.', 'Output directory (root of output hierarchy).')
 flags.register_validator('output', lambda o: pathlib.Path(o).is_dir(), message='output must be an existing directory.')
 
 flags.DEFINE_bool('force', False, 'Overwrite unchanged files.')

@@ -86,8 +86,21 @@ module socket_mirror(dim) {
   }
 }
 
-module brick(coords=SQUARE, size = SIZE){ 
-    xyz_cuts() xy_sockets(size, coords) xy_studs(size, coords) brick_cube(size, coords);
+module brick(coords=SQUARE, size = SIZE){
+    xyz_cuts() xy_sockets(size, coords) xy_studs(size, coords) {
+        // Check if this is a textured tile
+        if (TEXTURE != "undef" && TEXTURE != "") {
+            // Create base cube slightly shorter to accommodate texture
+            translate([0, 0, 0])
+                cuboid(coords * [size.x, size.y, size.z - 0.9/U], p1 = [0,0,0]);
+            // Add texture surface on top
+            translate([-0.5, -0.5, size.z - 0.9/U] * U)
+                texture(TEXTURE);
+        } else {
+            // Standard brick without texture
+            brick_cube(size, coords);
+        }
+    }
 }
 /*
 module brick() {

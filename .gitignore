@@ -1,3 +1,7 @@
 OpenForge
 **/*.stl
 **/__pycache__
+Plates/**/*
+Blank/**/*
+Reference/**/*
+RusticWood/**/*

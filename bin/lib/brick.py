@@ -9,15 +9,60 @@ configuration parameters for OpenSCAD generation.
 from __future__ import annotations
 
 import collections
+import json
 import pathlib
 
 from absl import logging
 from collections import UserDict
+from functools import lru_cache
 from typing import Any, Dict, Tuple
 
 class InvalidBrick(ValueError):
   """Exception raised when a brick configuration is invalid."""
   pass
+
+@lru_cache(maxsize=1)
+def load_textures() -> Dict[str, Any]:
+  """Load texture definitions from textures.json.
+
+  Returns:
+    Dictionary mapping texture names to their definitions
+  """
+  textures_path = pathlib.Path(__file__).parent.parent.parent / 'textures' / 'textures.json'
+  try:
+    with open(textures_path, 'r') as f:
+      return json.load(f)
+  except (FileNotFoundError, json.JSONDecodeError) as e:
+    logging.warning(f'Could not load textures.json: {e}')
+    return {}
+
+def resolve_texture_path(texture_name: str) -> str:
+  """Resolve a texture name to its file path.
+
+  If the texture name is in textures.json, returns the path from the 'file' field.
+  Otherwise, assumes it's already a file path and returns it as-is.
+
+  Args:
+    texture_name: Texture name or file path
+
+  Returns:
+    Path to the texture file (relative to scad directory: ../textures/filename.png)
+  """
+  textures = load_textures()
+
+  # Check if this is a known texture name
+  if texture_name in textures:
+    texture_def = textures[texture_name]
+    # Use 'file' field if present, otherwise use 'name.png'
+    filename = texture_def.get('file', f"{texture_name}.png")
+    return f"../textures/{filename}"
+
+  # If not in textures.json, check if it's already a path
+  if '/' in texture_name or texture_name.endswith('.png'):
+    return texture_name
+
+  # Otherwise treat as a texture name and construct path
+  return f"../textures/{texture_name}.png"
 
 class Brick:
   """Represents a single 3D printable brick configuration.
@@ -118,7 +163,7 @@ class Brick:
 
     Returns:
       Dictionary of configuration items formatted for OpenSCAD template expansion
-    """ 
+    """
     def stringify(v):
       """Convert Python values to OpenSCAD string format."""
       if type(v) is bool:
@@ -126,6 +171,15 @@ class Brick:
       if type(v) is None:
         return "undef"
       return str(v)
+
+    # Process all keywords, resolving texture names to paths
+    kwds_processed = {}
+    for k, v in self._kwds.items():
+      if k == 'texture' and v:
+        # Resolve texture name to file path
+        kwds_processed[k] = resolve_texture_path(v)
+      else:
+        kwds_processed[k] = v
 
     # Return a defaultdict with all OpenSCAD parameters
     return collections.defaultdict(lambda: "undef",
@@ -135,7 +189,7 @@ class Brick:
       'grid': stringify(self.grid),
       'size': stringify(self.size),
 
-      **{k: stringify(v) for (k,v) in self._kwds.items()}
+      **{k: stringify(v) for (k,v) in kwds_processed.items()}
       }
     )
 

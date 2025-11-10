@@ -17,5 +17,10 @@
     "input": "input/wood_planks_07_height_1k.png",
     "size": "512x512",
     "gamma": 0.8
+  },
+  "rustic_wooden": {
+    "name": "rustic_wooden",
+    "file": "rustic_wooden.png",
+    "origin": "local"
   }
 }

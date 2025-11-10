@@ -1,5 +1,5 @@
 generate:
-  Tiles:
+  RusticWoodTiles:
     generate:
       x: [1,2,3,4,5,6,7,8]
       y: [1,2,3,4,5,6,7,8]
@@ -9,8 +9,8 @@ generate:
       type: Tile
       set: RusticWood
       studs: False
-      texture: rustic_wood.png
-  Walls:
+      texture: rustic_wooden
+  RusticWoodWalls:
     generate:
       x: [1,2,3,4,5,6,7,8]
     config:
@@ -20,7 +20,7 @@ generate:
       studs: True
       y: 1
       z: 4
-  HexGrids:
+  RusticWoodHexGrids:
     generate:
        x: [1,2,3,4]
        y: [1,2,3,4]
@@ -28,7 +28,7 @@ generate:
       <<: *RusticWood
       family: Hex
       grid: True
-  HexHalfX:
+  RusticWoodHexHalfX:
     generate:
        x: [1]
        y: [1,2,3,4]
@@ -37,7 +37,7 @@ generate:
       family: Hex
       variant: HalfX
       cutX: 0
-  HexHalfY:
+  RusticWoodHexHalfY:
     generate:
        x: [1,2,3,4]
        y: [1]
@@ -47,7 +47,7 @@ generate:
       variant: HalfY
       cutY: 0
 
-  HexRSTiles:
+  RusticWoodHexRSTiles:
     generate:
       x: [1,2,3,4]
       family: ["HexR", "HexS"]
