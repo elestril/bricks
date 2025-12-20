@@ -1,0 +1,10 @@
+
+generate:
+  MyTestTile:
+    generate:
+      x: [2]
+      y: [2]
+    config:
+      type: Tile
+      set: MyTest
+      texture: wood_planks
