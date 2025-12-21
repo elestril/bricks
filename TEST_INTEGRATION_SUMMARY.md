@@ -9,19 +9,19 @@ Successfully integrated comprehensive testing infrastructure into the brick conf
 ### 1. Test Suite (91 tests across 7 modules)
 
 #### Test Files
-- **[bin/tests/test_globals.py](bin/tests/test_globals.py)** - 6 tests for global constants
-- **[bin/tests/test_stats.py](bin/tests/test_stats.py)** - 8 tests for statistics tracking
-- **[bin/tests/test_brick.py](bin/tests/test_brick.py)** - 39 tests for Brick class
-- **[bin/tests/test_generate.py](bin/tests/test_generate.py)** - 14 tests for parametric generation
-- **[bin/tests/test_remix.py](bin/tests/test_remix.py)** - 12 tests for STL remixing
-- **[bin/tests/test_bricks.py](bin/tests/test_bricks.py)** - 10 tests for orchestration
-- **[bin/tests/test_configure.py](bin/tests/test_configure.py)** - 12 tests for main script
+- **[bin.DEPRECATED/tests/test_globals.py](bin.DEPRECATED/tests/test_globals.py)** - 6 tests for global constants
+- **[bin.DEPRECATED/tests/test_stats.py](bin.DEPRECATED/tests/test_stats.py)** - 8 tests for statistics tracking
+- **[bin.DEPRECATED/tests/test_brick.py](bin.DEPRECATED/tests/test_brick.py)** - 39 tests for Brick class
+- **[bin.DEPRECATED/tests/test_generate.py](bin.DEPRECATED/tests/test_generate.py)** - 14 tests for parametric generation
+- **[bin.DEPRECATED/tests/test_remix.py](bin.DEPRECATED/tests/test_remix.py)** - 12 tests for STL remixing
+- **[bin.DEPRECATED/tests/test_bricks.py](bin.DEPRECATED/tests/test_bricks.py)** - 10 tests for orchestration
+- **[bin.DEPRECATED/tests/test_configure.py](bin.DEPRECATED/tests/test_configure.py)** - 12 tests for main script
 
 #### Supporting Files
-- **[bin/tests/run_tests.py](bin/tests/run_tests.py)** - Executable test runner with CLI
-- **[bin/tests/__init__.py](bin/tests/__init__.py)** - Package initialization
-- **[bin/tests/README.md](bin/tests/README.md)** - Test documentation
-- **[bin/tests/TESTS_SUMMARY.md](bin/tests/TESTS_SUMMARY.md)** - Detailed test breakdown
+- **[bin.DEPRECATED/tests/run_tests.py](bin.DEPRECATED/tests/run_tests.py)** - Executable test runner with CLI
+- **[bin.DEPRECATED/tests/__init__.py](bin.DEPRECATED/tests/__init__.py)** - Package initialization
+- **[bin.DEPRECATED/tests/README.md](bin.DEPRECATED/tests/README.md)** - Test documentation
+- **[bin.DEPRECATED/tests/TESTS_SUMMARY.md](bin.DEPRECATED/tests/TESTS_SUMMARY.md)** - Detailed test breakdown
 
 ### 2. Makefile Integration
 
@@ -41,8 +41,8 @@ Successfully integrated comprehensive testing infrastructure into the brick conf
 ### 3. Documentation
 
 - **[MAKEFILE_TARGETS.md](MAKEFILE_TARGETS.md)** - Complete Makefile reference
-- **[bin/tests/README.md](bin/tests/README.md)** - Test suite guide
-- **[bin/tests/TESTS_SUMMARY.md](bin/tests/TESTS_SUMMARY.md)** - Test statistics
+- **[bin.DEPRECATED/tests/README.md](bin.DEPRECATED/tests/README.md)** - Test suite guide
+- **[bin.DEPRECATED/tests/TESTS_SUMMARY.md](bin.DEPRECATED/tests/TESTS_SUMMARY.md)** - Test statistics
 - **This file** - Integration summary
 
 ## Usage Examples
@@ -282,17 +282,17 @@ make clean test
 ## Files Created/Modified Summary
 
 ### New Files (11)
-1. `bin/tests/test_globals.py`
-2. `bin/tests/test_stats.py`
-3. `bin/tests/test_brick.py`
-4. `bin/tests/test_generate.py`
-5. `bin/tests/test_remix.py`
-6. `bin/tests/test_bricks.py`
-7. `bin/tests/test_configure.py`
-8. `bin/tests/run_tests.py`
-9. `bin/tests/__init__.py`
-10. `bin/tests/README.md`
-11. `bin/tests/TESTS_SUMMARY.md`
+1. `bin.DEPRECATED/tests/test_globals.py`
+2. `bin.DEPRECATED/tests/test_stats.py`
+3. `bin.DEPRECATED/tests/test_brick.py`
+4. `bin.DEPRECATED/tests/test_generate.py`
+5. `bin.DEPRECATED/tests/test_remix.py`
+6. `bin.DEPRECATED/tests/test_bricks.py`
+7. `bin.DEPRECATED/tests/test_configure.py`
+8. `bin.DEPRECATED/tests/run_tests.py`
+9. `bin.DEPRECATED/tests/__init__.py`
+10. `bin.DEPRECATED/tests/README.md`
+11. `bin.DEPRECATED/tests/TESTS_SUMMARY.md`
 
 ### Modified Files (2)
 1. `Makefile` - Added test targets, help, clean
@@ -303,7 +303,7 @@ make clean test
 2. `TEST_INTEGRATION_SUMMARY.md` - This file
 
 ### Fixed (1)
-1. `bin/lib/brick.py` - Fixed indentation error
+1. `bin.DEPRECATED/lib/brick.py` - Fixed indentation error
 
 ## Success Metrics
 

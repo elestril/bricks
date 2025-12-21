@@ -1,6 +1,6 @@
 # Brick Configuration System Tests
 
-This directory contains comprehensive unit tests for all Python modules in the `bin/` directory.
+This directory contains comprehensive unit tests for all Python modules in the `bin.DEPRECATED/` directory.
 
 ## Test Coverage
 
@@ -18,7 +18,7 @@ The test suite covers:
 
 ### Run all tests
 ```bash
-cd bin/tests
+cd bin.DEPRECATED/tests
 python run_tests.py
 ```
 
@@ -42,16 +42,16 @@ python run_tests.py -q
 ### Run using unittest directly
 ```bash
 # Run all tests
-python -m unittest discover -s bin/tests -p "test_*.py"
+python -m unittest discover -s bin.DEPRECATED/tests -p "test_*.py"
 
 # Run specific test file
-python -m unittest bin/tests/test_brick.py
+python -m unittest bin.DEPRECATED.tests.test_brick
 
 # Run specific test class
-python -m unittest bin.tests.test_brick.TestBrick
+python -m unittest bin.DEPRECATED.tests.test_brick.TestBrick
 
 # Run specific test method
-python -m unittest bin.tests.test_brick.TestBrick.test_brick_creation_with_defaults
+python -m unittest bin.DEPRECATED.tests.test_brick.TestBrick.test_brick_creation_with_defaults
 ```
 
 ## Test Structure
@@ -125,7 +125,7 @@ To integrate with CI/CD:
 
 ```bash
 # Run tests with coverage
-python -m coverage run -m unittest discover -s bin/tests
+python -m coverage run -m unittest discover -s bin.DEPRECATED/tests
 python -m coverage report
 python -m coverage html
 ```
@@ -146,7 +146,7 @@ When adding new functionality:
 If you get import errors, ensure you're running from the correct directory:
 ```bash
 cd /home/harald/3d/bricks
-python bin/tests/run_tests.py
+python bin.DEPRECATED/tests/run_tests.py
 ```
 
 ### Mock issues

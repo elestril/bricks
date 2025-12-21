@@ -32,27 +32,27 @@ configure:
 	@echo "Configuring bricks from YAML files..."
 	@if [ -n "$(OUTPUT)" ]; then \
 		echo "Output directory: $(OUTPUT)"; \
-		python3 bin/configure.py --output=$(OUTPUT); \
+		python3 bin.DEPRECATED/configure.py --output=$(OUTPUT); \
 	else \
-		python3 bin/configure.py; \
+		python3 bin.DEPRECATED/configure.py; \
 	fi
 
 # Test targets
 test:
-	@echo "Running all tests..."
-	@python3 bin/tests/run_tests.py
+	@echo "Running all tests with pytest..."
+	@pytest tests
 
 test-verbose:
-	@echo "Running tests with verbose output..."
-	@python3 bin/tests/run_tests.py -v
+	@echo "Running tests with verbose output (pytest -vv)..."
+	@pytest -vv tests
 
 test-quiet:
-	@echo "Running tests in quiet mode..."
-	@python3 bin/tests/run_tests.py -q
+	@echo "Running tests in quiet mode (pytest -q)..."
+	@pytest -q tests
 
 test-coverage:
 	@echo "Running tests with coverage..."
-	@python3 -m coverage run -m unittest discover -s bin/tests -p "test_*.py"
+	@python3 -m coverage run -m pytest tests
 	@python3 -m coverage report
 	@echo ""
 	@echo "HTML coverage report generated: htmlcov/index.html"
@@ -60,8 +60,8 @@ test-coverage:
 
 # Run specific test module
 test-%:
-	@echo "Running tests for $*..."
-	@python3 bin/tests/run_tests.py test_$*
+	@echo "Running pytest for $*..."
+	@pytest tests/test_$*.py
 
 # Clean targets
 clean:
@@ -108,11 +108,11 @@ help:
 	@echo "                         Example: make preview FILE=RusticWood/Tiles/RusticWood-Tile-2x2.scad"
 	@echo ""
 	@echo "Test targets:"
-	@echo "  make test            - Run all tests"
-	@echo "  make test-verbose    - Run tests with verbose output"
-	@echo "  make test-quiet      - Run tests in quiet mode"
-	@echo "  make test-coverage   - Run tests with coverage report"
-	@echo "  make test-<module>   - Run specific test module (e.g., make test-brick)"
+	@echo "  make test            - Run all pytest suites in tests/"
+	@echo "  make test-verbose    - Run pytest with -vv"
+	@echo "  make test-quiet      - Run pytest with -q"
+	@echo "  make test-coverage   - Run pytest under coverage and emit reports"
+	@echo "  make test-<module>   - Run specific pytest module (e.g., make test-brick)"
 	@echo ""
 	@echo "Clean targets:"
 	@echo "  make clean           - Remove generated Python cache files and coverage reports"

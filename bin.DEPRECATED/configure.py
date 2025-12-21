@@ -51,7 +51,17 @@ def main(argv):
 
   # Initialize the brick configuration system
   config = Bricks()
-  ymls = pathlib.Path('.').glob(FLAGS.configs)
+
+  configs_flag = FLAGS.configs
+  configs_path = pathlib.Path(configs_flag)
+  if configs_path.is_absolute():
+    search_dir = configs_path.parent
+    pattern = configs_path.name
+  else:
+    search_dir = pathlib.Path('.')
+    pattern = configs_flag
+
+  ymls = search_dir.glob(pattern)
 
   # Process all YAML configuration files
   config.configure(ymls)

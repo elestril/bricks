@@ -24,7 +24,7 @@ make all
 ```
 
 **What it does:**
-- Executes `python3 bin/configure.py`
+- Executes `python3 bin.DEPRECATED/configure.py`
 - Processes all YAML files in `configs/` directory
 - Generates OpenSCAD `.scad` files
 - Creates `config.json` with parameter sets
@@ -127,13 +127,13 @@ make test-coverage
 Running tests with coverage...
 Name                      Stmts   Miss  Cover
 ---------------------------------------------
-bin/lib/brick.py             85      5    94%
-bin/lib/bricks.py           112     15    87%
-bin/lib/generate.py          28      2    93%
-bin/lib/globals.py           12      0   100%
-bin/lib/remix.py             95     12    87%
-bin/lib/stats.py              3      0   100%
-bin/configure.py             18      2    89%
+bin.DEPRECATED/lib/brick.py             85      5    94%
+bin.DEPRECATED/lib/bricks.py           112     15    87%
+bin.DEPRECATED/lib/generate.py          28      2    93%
+bin.DEPRECATED/lib/globals.py           12      0   100%
+bin.DEPRECATED/lib/remix.py             95     12    87%
+bin.DEPRECATED/lib/stats.py              3      0   100%
+bin.DEPRECATED/configure.py             18      2    89%
 ---------------------------------------------
 TOTAL                       353     36    90%
 
@@ -304,19 +304,19 @@ The Makefiles use `python3` explicitly. If you need to use a different Python:
 
 ```bash
 # Edit Makefile and change:
-python3 bin/tests/run_tests.py
+python3 bin.DEPRECATED/tests/run_tests.py
 # to:
-/path/to/your/python bin/tests/run_tests.py
+/path/to/your/python bin.DEPRECATED/tests/run_tests.py
 ```
 
 ### Permissions Issues
 
 ```bash
 # Make test runner executable
-chmod +x bin/tests/run_tests.py
+chmod +x bin.DEPRECATED/tests/run_tests.py
 
 # Run with explicit python
-python3 bin/tests/run_tests.py
+python3 bin.DEPRECATED/tests/run_tests.py
 ```
 
 ## Files Modified
@@ -336,6 +336,6 @@ Both files now support:
 
 ## Related Documentation
 
-- [bin/tests/README.md](bin/tests/README.md) - Test suite documentation
-- [bin/tests/TESTS_SUMMARY.md](bin/tests/TESTS_SUMMARY.md) - Detailed test breakdown
-- Test runner: [bin/tests/run_tests.py](bin/tests/run_tests.py)
+- [bin.DEPRECATED/tests/README.md](bin.DEPRECATED/tests/README.md) - Test suite documentation
+- [bin.DEPRECATED/tests/TESTS_SUMMARY.md](bin.DEPRECATED/tests/TESTS_SUMMARY.md) - Detailed test breakdown
+- Test runner: [bin.DEPRECATED/tests/run_tests.py](bin.DEPRECATED/tests/run_tests.py)

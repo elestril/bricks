@@ -42,13 +42,13 @@ make clean test        # Clean then test
 
 ```bash
 # Using test runner directly
-python3 bin/tests/run_tests.py              # All tests
-python3 bin/tests/run_tests.py -v           # Verbose
-python3 bin/tests/run_tests.py test_brick   # Specific
+python3 bin.DEPRECATED/tests/run_tests.py              # All tests
+python3 bin.DEPRECATED/tests/run_tests.py -v           # Verbose
+python3 bin.DEPRECATED/tests/run_tests.py test_brick   # Specific
 
 # Using unittest
-python3 -m unittest discover -s bin/tests   # All tests
-python3 -m unittest bin.tests.test_brick    # Module
+python3 -m unittest discover -s bin.DEPRECATED/tests   # All tests
+python3 -m unittest bin.DEPRECATED.tests.test_brick    # Module
 ```
 
 ## ✅ Current Status
@@ -62,7 +62,7 @@ python3 -m unittest bin.tests.test_brick    # Module
 ## 📚 Documentation
 
 - [MAKEFILE_TARGETS.md](MAKEFILE_TARGETS.md) - Complete target reference
-- [bin/tests/README.md](bin/tests/README.md) - Test suite guide
+- [bin.DEPRECATED/tests/README.md](bin.DEPRECATED/tests/README.md) - Test suite guide
 - [TEST_INTEGRATION_SUMMARY.md](TEST_INTEGRATION_SUMMARY.md) - Full summary
 
 ## 🔧 Common Workflows

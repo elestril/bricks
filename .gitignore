@@ -5,3 +5,5 @@ Plates/**/*
 Blank/**/*
 Reference/**/*
 RusticWood/**/*
+output/*
+!output/.gitkeep

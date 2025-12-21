@@ -108,31 +108,31 @@ Tests for `configure.py` - Main script
 ### Quick Start
 ```bash
 # Run all tests
-python3 bin/tests/run_tests.py
+python3 bin.DEPRECATED/tests/run_tests.py
 
 # Run with verbose output
-python3 bin/tests/run_tests.py -v
+python3 bin.DEPRECATED/tests/run_tests.py -v
 
 # Run specific module
-python3 bin/tests/run_tests.py test_brick
+python3 bin.DEPRECATED/tests/run_tests.py test_brick
 
 # Run in quiet mode
-python3 bin/tests/run_tests.py -q
+python3 bin.DEPRECATED/tests/run_tests.py -q
 ```
 
 ### Using unittest directly
 ```bash
 # Run all tests
-python3 -m unittest discover -s bin/tests -p "test_*.py"
+python3 -m unittest discover -s bin.DEPRECATED/tests -p "test_*.py"
 
 # Run specific test file
-python3 -m unittest bin.tests.test_brick
+python3 -m unittest bin.DEPRECATED.tests.test_brick
 
 # Run specific test class
-python3 -m unittest bin.tests.test_brick.TestBrick
+python3 -m unittest bin.DEPRECATED.tests.test_brick.TestBrick
 
 # Run specific test method
-python3 -m unittest bin.tests.test_brick.TestBrick.test_brick_creation_with_defaults
+python3 -m unittest bin.DEPRECATED.tests.test_brick.TestBrick.test_brick_creation_with_defaults
 ```
 
 ## Test Quality Metrics
@@ -200,11 +200,11 @@ The test suite is designed for CI/CD integration:
 ```yaml
 # Example GitHub Actions workflow
 - name: Run Tests
-  run: python3 bin/tests/run_tests.py
+  run: python3 bin.DEPRECATED/tests/run_tests.py
 
 - name: Run Tests with Coverage
   run: |
-    python3 -m coverage run -m unittest discover -s bin/tests
+    python3 -m coverage run -m unittest discover -s bin.DEPRECATED/tests
     python3 -m coverage report
     python3 -m coverage html
 ```

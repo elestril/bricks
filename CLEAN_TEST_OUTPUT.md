@@ -18,7 +18,7 @@ This made it difficult to read test results and cluttered CI/CD logs.
 
 ## Solution
 
-Modified [bin/configure.py](bin/configure.py) to suppress STATS output during test runs while preserving it for normal execution.
+Modified [bin.DEPRECATED/configure.py](bin.DEPRECATED/configure.py) to suppress STATS output during test runs while preserving it for normal execution.
 
 ### Implementation
 
@@ -85,7 +85,7 @@ def test_main_suppresses_stats_in_test_mode(self, ...):
 STATS still work correctly when running configure.py normally:
 
 ```bash
-$ python3 bin/configure.py --configs='configs/Blanks.yaml'
+$ python3 bin.DEPRECATED/configure.py --configs='configs/Blanks.yaml'
 ...
 Blank-Tile-HexS4: new
 
@@ -107,14 +107,14 @@ total:
 
 ## Files Modified
 
-1. **[bin/configure.py](bin/configure.py)** - Added test mode detection
-2. **[bin/tests/test_configure.py](bin/tests/test_configure.py)** - Added suppression test
+1. **[bin.DEPRECATED/configure.py](bin.DEPRECATED/configure.py)** - Added test mode detection
+2. **[bin.DEPRECATED/tests/test_configure.py](bin.DEPRECATED/tests/test_configure.py)** - Added suppression test
 
 ## Files Updated
 
 Documentation updated to reflect 92 tests and clean output:
 
-1. **[bin/tests/TESTS_SUMMARY.md](bin/tests/TESTS_SUMMARY.md)** - Updated test count
+1. **[bin.DEPRECATED/tests/TESTS_SUMMARY.md](bin.DEPRECATED/tests/TESTS_SUMMARY.md)** - Updated test count
 2. **[TEST_INTEGRATION_SUMMARY.md](TEST_INTEGRATION_SUMMARY.md)** - Updated metrics
 3. **[TESTING_QUICK_REF.md](TESTING_QUICK_REF.md)** - Updated reference
 

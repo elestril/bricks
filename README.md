@@ -3,7 +3,7 @@
 Default workflow:
 
 * Create a new directory, preferably outside this repo, to hold the generated stl files, and `cd` into that directory.
-* run `${PATH_TO_REPO}/bin/configure.py` with the right options. This creates a directory tree containing the `.json` configs and a`Makefile` in each directory.
+* run `${PATH_TO_REPO}/bin.DEPRECATED/configure.py` with the right options. This creates a directory tree containing the `.json` configs and a`Makefile` in each directory.
 * run `make` , use a small `-j` , but openscad does some parallelization on it's own. 
 
 
@@ -25,15 +25,15 @@ This work is licensed under a
 
 ## PythonSCAD & Testing
 
-The repository also contains a PythonSCAD toolkit (`pythonscad/`) that mirrors the SCAD primitives in pure Python. The canonical `Blank-Wall-4x1` generator lives in `pythonscad/reference.py` and is validated through pytest.
+The repository also contains a PythonSCAD toolkit (`pythonscad/`) that mirrors the SCAD primitives in pure Python. The canonical `Blank-Wall-4x1` generator now lives in `bin/reference.py` and is validated through pytest.
 
 Run the PythonSCAD tests with:
 
 ```
-pytest pythonscad/tests
+pytest tests
 ```
 
-Or run `pytest` from inside `pythonscad/tests`. The local `conftest.py` ensures the repository root is on `PYTHONPATH` either way. See `pythonscad/README.md` and `pythonscad/tests/README.md` for module-level details, helper descriptions, and documented invariants enforced by the suite.
+Or run `pytest` from inside `tests/`. The local `conftest.py` ensures the repository root is on `PYTHONPATH` either way. See `pythonscad/README.md` and `tests/README.md` for module-level details, helper descriptions, and documented invariants enforced by the suite.
 
 [cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
 [cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
