@@ -23,6 +23,18 @@ This work is licensed under a
 
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
 
+## PythonSCAD & Testing
+
+The repository also contains a PythonSCAD toolkit (`pythonscad/`) that mirrors the SCAD primitives in pure Python. The canonical `Blank-Wall-4x1` generator lives in `pythonscad/reference.py` and is validated through pytest.
+
+Run the PythonSCAD tests with:
+
+```
+pytest pythonscad/tests
+```
+
+Or run `pytest` from inside `pythonscad/tests`. The local `conftest.py` ensures the repository root is on `PYTHONPATH` either way. See `pythonscad/README.md` and `pythonscad/tests/README.md` for module-level details, helper descriptions, and documented invariants enforced by the suite.
+
 [cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
 [cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
 [cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
