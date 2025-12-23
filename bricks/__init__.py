@@ -1,10 +1,6 @@
-"""PythonSCAD helpers that mirror the legacy OpenSCAD brick macros.
+"""Helpers for generating STL assets directly from Python."""
 
-This package intentionally mirrors the structure of ``scad/stud.scad`` so that
-new PythonSCAD entrypoints can reuse identical building blocks when migrating
-away from the OpenSCAD templating workflow documented in README.md.
-"""
+from .stud import stud, socket, socket_blank, FitType
+from .brick import Brick 
 
-from .stud import socket, socket_blank, stud
-
-__all__ = ["stud", "socket", "socket_blank"]
+__all__ = ["build_from_yaml", "stud", "socket", "socket_blank", "Brick", "Point"]

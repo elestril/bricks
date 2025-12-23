@@ -7,39 +7,33 @@ https://pythonscad.org/tutorial/site/ for API usage details).
 """
 
 from typing import Iterable, Sequence
+from enum import Enum
 
-from openscad import circle, cube, linear_extrude, polygon, rotate_extrude, union
+from openscad import PyOpenSCAD, circle, cube, linear_extrude, polygon, rotate_extrude, union
 
 Point2D = Sequence[float]
 
 
-_STUD_PROFILE: list[list[float]] = [
-    [0.0, -0.8],  # skirt start
-    [2.4, -0.8],
-    [2.4, 1.0],
-    [2.6, 1.2],
-    [2.6, 1.6],
-    [2.4, 1.8],
-    [0.0, 1.8],
-]
+class FitType(Enum):
+    SNUG = "snug"
+    LOOSE = "loose"
 
-
-def _stud_profile_poly():
-    """Return the 2D polygon used for both studs and sockets."""
-
-    return polygon(points=_STUD_PROFILE)
-
-
-def stud(convexity: int = 2):
+def stud() -> PyOpenSCAD:
     """Create the canonical LEGO-style stud using ``rotate_extrude``."""
+    return rotate_extrude(
+      polygon(
+        points=[
+        [0.0, -0.8],  # skirt start
+        [2.4, -0.8],
+        [2.4, 1.0],
+        [2.6, 1.2],
+        [2.6, 1.6],
+        [2.4, 1.8],
+        [0.0, 1.8]], convexity=2), convexity=2)
 
-    return rotate_extrude(_stud_profile_poly(), convexity=convexity)
-
-
-def _socket_profile_points(fit: str) -> list[list[float]]:
-    snug = fit.lower() == "snug"
-    inset = 2.5 if snug else 2.6
-    return [
+def _socket_profile_poly(fit: str) -> PyOpenSCAD:
+    inset = 2.5 if fit == FitType.SNUG else 2.6
+    return polygon(points=[
         [0.0, -0.4],
         [4.0, -0.4],
         [4.0, 2.2],
@@ -51,33 +45,22 @@ def _socket_profile_points(fit: str) -> list[list[float]]:
         [3.1, 1.6],
         [3.1, 2.2],
         [0.0, 2.2],
-    ]
+    ])
+                   
 
+_SOCKET_SYMMETRY_ANGLES = { 
+    2: (0.0,),
+    3: (0.0, 60.0, 120.0),
+    4: (0.0, 90.0)
+}
 
-def _socket_profile_poly(fit: str):
-    return polygon(points=_socket_profile_points(fit))
-
-
-def _symmetry_angles(symmetry: int) -> Iterable[float]:
-    if symmetry == 2:
-        return (0.0,)
-    if symmetry == 3:
-        return (0.0, 60.0, 120.0)
-    return (0.0, 90.0)
-
-
-def socket(*, fit: str = "snug", symmetry: int = 4):
+def socket(fit: FitType = FitType.SNUG, symmetry: int = 4) -> PyOpenSCAD:
     """Create a socket that mates with :func:`stud`.
-
-    The API mirrors ``socket(fit="snug", symmetry=4)`` from the SCAD source, but
-    returns a PythonSCAD object that callers can union or difference just like
-    any other primitive (see the "Combining objects" tutorial section).
     """
-
     body = rotate_extrude(_socket_profile_poly(fit), convexity=4)
     arms = [
         cube([7.2, 0.4, 4.4], center=True).rotate([0.0, 0.0, angle])
-        for angle in _symmetry_angles(symmetry)
+        for angle in _SOCKET_SYMMETRY_ANGLES.get(symmetry, [0.0])
     ]
     return union([body, *arms])
 

@@ -1,10 +1,14 @@
 ## Usage
 
-Default workflow:
+Default workflow (direct STL generation):
 
-* Create a new directory, preferably outside this repo, to hold the generated stl files, and `cd` into that directory.
-* run `${PATH_TO_REPO}/bin.DEPRECATED/configure.py` with the right options. This creates a directory tree containing the `.json` configs and a`Makefile` in each directory.
-* run `make` , use a small `-j` , but openscad does some parallelization on it's own. 
+* Create a new directory, preferably outside this repo, to hold the generated STL files, and `cd` into that directory.
+* Run `${PATH_TO_REPO}/bin/reference.py --config=${PATH_TO_REPO}/configs/Blanks.yaml --output=$(pwd)` (swap the config/output values as needed). The script loads the YAML via `bricks/config.py` and writes `config.json` plus `.stl` assets without touching the deprecated OpenSCAD toolchain.
+* Consume the generated STL files with the slicer of your choice.
+
+Legacy workflow (kept for archival purposes):
+
+* `${PATH_TO_REPO}/bin.DEPRECATED/configure.py` still emits `.scad` sources and Makefiles compatible with `openscad`. Only use this path if you explicitly need the historical artifacts; the pytest suite and `bin/reference.py` no longer call it.
 
 
 ### configure.py options

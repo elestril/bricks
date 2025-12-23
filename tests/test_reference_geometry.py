@@ -16,8 +16,8 @@ REFERENCE_STL = PROJECT_ROOT / "Reference/Walls/Blank-Wall-4x1.stl"
 TESTDATA_STL = PROJECT_ROOT / "tests/testdata/Blank-Wall-4x1.stl"
 EXPECTED_PARAMETER_SETS = 76
 SAMPLE_BRICKS = [
-    Path("Blank/Tiles/Blank-Tile-2x2.scad"),
-    Path("Reference/Walls/Blank-Wall-4x1.scad"),
+    Path("Blank/Tiles/Blank-Tile-2x2.stl"),
+    Path("Reference/Walls/Blank-Wall-4x1.stl"),
 ]
 
 

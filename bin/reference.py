@@ -1,13 +1,19 @@
-#!/usr/bin/env python3
-"""Generate the Blank brick set defined in configs/Blanks.yaml."""
+#!/usr/bin/env pythonscad
+"""Generate STL bricks defined in a YAML configuration file."""
 
-import subprocess
 import sys
 from pathlib import Path
 
 from absl import app, flags, logging
 
+from bricks import brick
+from openscad import *
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string(
@@ -27,23 +33,14 @@ def main(argv: list[str]) -> None:
 
     config_path = Path(FLAGS.config).resolve()
     output_dir = Path(FLAGS.output).resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    configure_script = PROJECT_ROOT / "bin.DEPRECATED" / "configure.py"
-    if not configure_script.exists():
-        raise FileNotFoundError(f"Could not locate configure.py at {configure_script}")
-
-    command = [
-        sys.executable,
-        str(configure_script),
-        f"--configs={config_path}",
-        f"--output={output_dir}",
-    ]
     logging.info("Generating bricks from %s into %s", config_path, output_dir)
-    result = subprocess.run(command, cwd=PROJECT_ROOT, check=False)
-    if result.returncode != 0:
-        raise SystemExit(result.returncode)
 
+    b = brick.brick(brick.Point(2, 4, 1))
+    b.show()
 
 if __name__ == "__main__":
+    print("WARNING: This script is deprecated. Use 'bricks build' command instead.")
     app.run(main)
+
+
+print("FOO")
